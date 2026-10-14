@@ -1,0 +1,14 @@
+{
+  "size": 1024,
+  "sideKm": 80.0,
+  "metersPerSample": 78.125,
+  "minElevation": 0,
+  "maxElevation": 3308,
+  "center": [
+    14.9934,
+    37.751
+  ],
+  "facingBearingDeg": 120.0,
+  "orientation": "plate rotated: its north-east diagonal points along bearing 120.0; row 0 = plate north, col 0 = plate west",
+  "source": "Mapterhorn terrain tiles (Regione Siciliana 2 m DTM, INGV TINITALY 10 m, Copernicus GLO-30), Terrarium encoding, zoom 12"
+}

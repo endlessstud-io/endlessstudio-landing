@@ -1,0 +1,122 @@
+---
+import MenuStories from "./MenuStories.astro";
+
+interface Props {
+  name?: string;
+  tagline?: string;
+  /** the menu's text: the original placeholder lead, or the project stories experiment (MenuStories.astro) */
+  menuCopy?: "lead" | "stories";
+}
+const { name = "endlessstudio", tagline = "coordinates and pixels", menuCopy = "lead" } = Astro.props;
+const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the moving gradient
+---
+
+<section class="sisyphus" aria-label={name} data-sisyphus-root>
+  <canvas class="sisyphus-canvas" data-sisyphus aria-hidden="true"></canvas>
+
+  <h1 class="sr-only">{name}</h1>
+
+  <!-- the wordmark and tagline, top left; the whole page opens the menu, the button keeps it reachable by keyboard -->
+  <button
+    class="wordmark"
+    type="button"
+    data-menu-toggle
+    aria-controls="menu"
+    aria-expanded="false"
+    aria-label={`${name} — menu`}
+  >
+    <span class="wordmark-name" aria-hidden="true"
+      >{sss < 0 ? name : <>{name.slice(0, sss)}<span class="wordmark-sss">sss</span>{name.slice(sss + 3)}</>}</span
+    >
+    <span class="wordmark-tagline" aria-hidden="true">{tagline}</span>
+  </button>
+
+  <!-- follows the stone: live latitude, longitude and the ground altitude under it (filled by the scene) -->
+  <p class="stone-tag" data-stone-tag aria-hidden="true">
+    <span data-lat></span>
+    <span data-lon></span>
+    <span data-alt></span>
+  </p>
+
+  <nav class="menu" id="menu" aria-label="Main" data-menu inert>
+    <!-- the stone rolls up to sit in this box; its width sets the stone's size -->
+    <div class="menu-emblem" data-stone-anchor aria-hidden="true"></div>
+    {
+      menuCopy === "stories" ? (
+        <MenuStories />
+      ) : (
+        <!-- placeholder copy -->
+        <p class="menu-lead">
+          Maps that argue, models that listen. Coordinates and pixels for the people deciding about forests, coasts and
+          cities.
+        </p>
+      )
+    }
+    <ul class="menu-list">
+      <li><a href="#">Work</a></li>
+      <li><a href="#">Studio</a></li>
+      <li><a href="#">Notes</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <!-- Mapterhorn's sources are CC BY 4.0, so the credit moved here from the corner caption -->
+    <p class="menu-credit">Etna, 3 308 m · terrain by <a href="https://mapterhorn.com">Mapterhorn</a></p>
+  </nav>
+
+  <!-- the cursor: an eye centred on the pointer, blinking now and then (eye-cursor.ts squashes the lid group) -->
+  <svg class="eye-cursor" data-eye viewBox="0 0 40 24" width="40" height="24" aria-hidden="true">
+    <g class="eye-cursor-lid" data-eye-lid>
+      <path class="eye-cursor-white" d="M2 12 Q20 -4 38 12 Q20 28 2 12 Z"></path>
+      <circle class="eye-cursor-iris" cx="20" cy="12" r="6.2"></circle>
+      <circle class="eye-cursor-pupil" cx="20" cy="12" r="2.9"></circle>
+      <circle class="eye-cursor-glint" cx="22.1" cy="9.9" r="1.1"></circle>
+      <path class="eye-cursor-rim" d="M2 12 Q20 -4 38 12 Q20 28 2 12 Z"></path>
+    </g>
+  </svg>
+</section>
+
+<script>
+  import { mountSisyphus, type SisyphusHandle } from "../scripts/sisyphus";
+  import { mountEyeCursor } from "../scripts/eye-cursor";
+
+  const root = document.querySelector<HTMLElement>("[data-sisyphus-root]");
+  const canvas = root?.querySelector<HTMLCanvasElement>("[data-sisyphus]");
+  const toggle = root?.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const menu = root?.querySelector<HTMLElement>("[data-menu]");
+  const anchor = menu?.querySelector<HTMLElement>("[data-stone-anchor]");
+  const stoneTag = root?.querySelector<HTMLElement>("[data-stone-tag]");
+  const eye = root?.querySelector<SVGSVGElement>("[data-eye]");
+
+  if (eye) mountEyeCursor(eye);
+
+  if (root && canvas && toggle && menu) {
+    let scene: SisyphusHandle | undefined;
+    let open = false;
+
+    // the HTML side of the menu works on its own, so the wordmark keeps working if WebGL is unavailable
+    const setMenu = (next: boolean) => {
+      open = next;
+      root.classList.toggle("is-menu-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      menu.inert = !open;
+      scene?.setMenu(open);
+    };
+    // a click anywhere toggles the menu (the wordmark's keyboard clicks bubble up here too); links still navigate
+    document.addEventListener("click", (e) => {
+      if (e.target instanceof Element && e.target.closest("a")) return;
+      setMenu(!open);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && open) setMenu(false);
+    });
+
+    mountSisyphus(canvas, { stoneAnchor: anchor, stoneTag })
+      .then((handle) => {
+        scene = handle;
+        if (open) handle.setMenu(true);
+      })
+      .catch((err) => {
+        console.error("sisyphus scene failed", err);
+        root.classList.add("is-static");
+      });
+  }
+</script>

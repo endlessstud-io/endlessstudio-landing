@@ -1,0 +1,165 @@
+---
+/**
+ * Menu copy, experiment (2026-10-14): five one-sentence stories behind past projects, each with a word that shows
+ * the project when hovered or focused (and opens it when clicked). To go back to the single placeholder lead, drop
+ * `menuCopy="stories"` from <SisyphusScene> in pages/index.astro; this file and public/projects/ can then go.
+ *
+ * Images are 640×400 crops of each project's public share/hero images, stand-ins until there are proper screenshots.
+ */
+interface Story {
+  before: string;
+  word: string;
+  after: string;
+  project: string;
+  href: string;
+  image: string;
+}
+
+const stories: Story[] = [
+  {
+    before: "Far out at sea, big fishing ",
+    word: "boats",
+    after: " work where nobody can watch them, yet most keep radioing their position; put all those signals together and anyone can see where fishing happens.",
+    project: "Global Fishing Watch",
+    href: "https://globalfishingwatch.org/map",
+    image: "/projects/global-fishing-watch.webp",
+  },
+  {
+    before: "In American cities ",
+    word: "shade",
+    after: " follows money and race, so every neighborhood gets a score that shows where new trees would cool the people who need them most.",
+    project: "Tree Equity Score",
+    href: "https://www.treeequityscore.org/",
+    image: "/projects/tree-equity-score.webp",
+  },
+  {
+    before: "Keep half the planet wild and most species survive, E. O. Wilson argued; the hard part is choosing which ",
+    word: "half",
+    after: ", so the map shows where thousands of species live.",
+    project: "Half-Earth Project Map",
+    href: "https://map.half-earthproject.org/",
+    image: "/projects/half-earth.webp",
+  },
+  {
+    before: "A shipload of ",
+    word: "soy",
+    after: " can carry a cleared forest inside it, until you follow it back, through the companies that traded it, to the place where it was grown.",
+    project: "Trase",
+    href: "https://trase.earth/",
+    image: "/projects/trase.webp",
+  },
+  {
+    before: "Protecting nature is a ",
+    word: "puzzle",
+    after: ": enough of every habitat, at the lowest cost to the people who live there, solved by trying millions of possible maps.",
+    project: "Marxan",
+    href: "https://marxanplanning.org/",
+    image: "/projects/marxan.webp",
+  },
+];
+---
+
+<!-- menu-lead: shares the lead's reveal transition when the menu opens -->
+<div class="menu-lead menu-stories">
+  {
+    // one line on purpose: Astro keeps template whitespace, and a break here puts a space before "," and ":"
+    stories.map((s) => (
+      <p>{s.before}<a class="story-word" href={s.href} target="_blank" rel="noopener">{s.word}<span class="story-preview"><img src={s.image} alt="" width="640" height="400" loading="lazy" decoding="async" /><span class="story-project">{s.project}</span></span></a>{s.after}</p>
+    ))
+  }
+</div>
+
+<style>
+  .menu-stories {
+    display: grid;
+    gap: clamp(0.5rem, 1.2vh, 0.9rem);
+    max-width: 42rem;
+    font-size: clamp(0.95rem, 1.2vw, 1.12rem);
+    font-weight: 400;
+    line-height: 1.42;
+    letter-spacing: 0;
+  }
+
+  .menu-stories p {
+    margin: 0;
+    text-wrap: pretty;
+    color: rgba(241, 233, 210, 0.78);
+  }
+
+  /* the word: full cream with a pink underline; the preview hangs above it */
+  .story-word {
+    position: relative;
+    color: var(--landing-cream);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--landing-pink);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    transition: color 200ms ease;
+  }
+
+  .story-word:hover,
+  .story-word:focus-visible {
+    color: var(--landing-pink);
+    outline: none;
+  }
+
+  .story-preview {
+    position: absolute;
+    bottom: calc(100% + 0.7rem);
+    left: 50%;
+    z-index: 2;
+    display: grid;
+    gap: 0.45rem;
+    width: clamp(13rem, 22vw, 17rem);
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(-50%, 0.4rem);
+    transition:
+      opacity 180ms ease,
+      transform 220ms ease,
+      visibility 0s linear 220ms;
+  }
+
+  .story-word:hover .story-preview,
+  .story-word:focus-visible .story-preview {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(-50%, 0);
+    transition:
+      opacity 180ms ease,
+      transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .story-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border: 1px solid rgba(241, 233, 210, 0.25);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+
+  .story-project {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--landing-cream);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .story-preview,
+    .story-word:hover .story-preview,
+    .story-word:focus-visible .story-preview {
+      transform: translate(-50%, 0);
+      transition: none;
+    }
+  }
+</style>

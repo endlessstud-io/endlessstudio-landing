@@ -1,0 +1,11 @@
+---
+import Base from "../layouts/Base.astro";
+import ScrollyStory from "../components/ScrollyStory.tsx";
+---
+
+<Base
+  title="Endless Studio — Animal trails through human landscapes"
+  description="A scrollytelling prototype using deck.gl terrain, trip layers and land-use overlays to explore connected animal, human and climate systems."
+>
+  <ScrollyStory client:only="react" />
+</Base>

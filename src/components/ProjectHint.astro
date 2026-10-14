@@ -1,0 +1,107 @@
+---
+/**
+ * A highlighted word that opens a project card (image or video, what was built, the stack) on hover or keyboard focus,
+ * towards the side of the screen with more room, and dims the page around it. Clicking opens the project when it has a
+ * link. Used inline in running text, so the markup stays on one line and ends the file: Astro keeps template
+ * whitespace. Behaviour: src/scripts/project-hints.ts, called by the component holding the words.
+ */
+import ProjectCard from "./ProjectCard.astro";
+import type { Hint } from "../data/projects";
+
+interface Props {
+  hint: Hint;
+}
+const { hint: h } = Astro.props;
+---
+
+<style>
+  /* the word: full cream with a pink underline */
+  .bio-hint {
+    position: relative;
+    white-space: nowrap;
+    color: var(--landing-cream);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--landing-pink);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    transition:
+      color 200ms ease,
+      opacity 300ms ease;
+  }
+
+  .bio-hint:hover,
+  .bio-hint:focus-visible {
+    color: var(--landing-pink);
+    outline: none;
+  }
+
+  /* spotlight: while a word is hovered or focused, the other words and the page around step back (the text around it
+     is dimmed by the component holding it) */
+  :global(.sisyphus:has(.bio-hint:hover, .bio-hint:focus-visible) .bio-hint:not(:hover, :focus-visible)) {
+    opacity: 0.45;
+  }
+
+  :global(.sisyphus:has(.bio-hint:hover, .bio-hint:focus-visible) :is(.wordmark, .menu-list, .menu-credit)) {
+    opacity: 0.25;
+  }
+
+  :global(.sisyphus:has(.bio-hint:hover, .bio-hint:focus-visible) .sisyphus-canvas) {
+    opacity: 0.45;
+    transition-duration: 400ms;
+  }
+
+  /* the card hangs off the word, hidden until hover or focus, opening towards the middle of the screen
+     (data-side and data-vert are set by project-hints.ts) */
+  .bio-hint :global(.bio-card) {
+    position: absolute;
+    z-index: 3;
+    width: min(clamp(26rem, 36vw, 34rem), 92vw);
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(0.4rem);
+    transition:
+      opacity 180ms ease,
+      transform 240ms ease,
+      visibility 0s linear 240ms;
+  }
+
+  .bio-hint[data-vert="above"] :global(.bio-card) {
+    bottom: calc(100% + 0.8rem);
+  }
+
+  .bio-hint[data-vert="below"] :global(.bio-card) {
+    top: calc(100% + 0.8rem);
+    transform: translateY(-0.4rem);
+  }
+
+  .bio-hint[data-side="right"] :global(.bio-card) {
+    left: -0.5rem;
+  }
+
+  .bio-hint[data-side="left"] :global(.bio-card) {
+    right: -0.5rem;
+  }
+
+  .bio-hint:hover :global(.bio-card),
+  .bio-hint:focus-visible :global(.bio-card) {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 180ms ease,
+      transform 280ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bio-hint :global(.bio-card),
+    .bio-hint:hover :global(.bio-card),
+    .bio-hint:focus-visible :global(.bio-card) {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
+
+<a class="bio-hint" href={h.href} target={h.href && "_blank"} rel={h.href && "noopener"} tabindex={h.href ? undefined : 0} data-hint data-side="right" data-vert="above">{h.word}<ProjectCard project={h} /></a>

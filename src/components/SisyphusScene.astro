@@ -1,11 +1,16 @@
 ---
+import MenuBio from "./MenuBio.astro";
 import MenuStories from "./MenuStories.astro";
+import MenuTimeline from "./MenuTimeline.astro";
 
 interface Props {
   name?: string;
   tagline?: string;
-  /** the menu's text: the original placeholder lead, or the project stories experiment (MenuStories.astro) */
-  menuCopy?: "lead" | "stories";
+  /**
+   * the menu's text: the original placeholder lead, the project stories (MenuStories.astro), the bio (MenuBio.astro) or
+   * the work as a climb along Etna's profile (MenuTimeline.astro, which brings its own stone anchor)
+   */
+  menuCopy?: "lead" | "stories" | "bio" | "timeline";
 }
 const { name = "endlessstudio", tagline = "coordinates and pixels", menuCopy = "lead" } = Astro.props;
 const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the moving gradient
@@ -39,10 +44,14 @@ const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the movin
   </p>
 
   <nav class="menu" id="menu" aria-label="Main" data-menu inert>
-    <!-- the stone rolls up to sit in this box; its width sets the stone's size -->
-    <div class="menu-emblem" data-stone-anchor aria-hidden="true"></div>
+    <!-- the stone rolls up to sit in this box; its width sets the stone's size (the timeline has its own, on the line) -->
+    {menuCopy !== "timeline" && <div class="menu-emblem" data-stone-anchor aria-hidden="true" />}
     {
-      menuCopy === "stories" ? (
+      menuCopy === "timeline" ? (
+        <MenuTimeline />
+      ) : menuCopy === "bio" ? (
+        <MenuBio />
+      ) : menuCopy === "stories" ? (
         <MenuStories />
       ) : (
         <!-- placeholder copy -->
@@ -102,7 +111,7 @@ const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the movin
     };
     // a click anywhere toggles the menu (the wordmark's keyboard clicks bubble up here too); links still navigate
     document.addEventListener("click", (e) => {
-      if (e.target instanceof Element && e.target.closest("a")) return;
+      if (e.target instanceof Element && e.target.closest("a, [data-keep-menu]")) return;
       setMenu(!open);
     });
     document.addEventListener("keydown", (e) => {

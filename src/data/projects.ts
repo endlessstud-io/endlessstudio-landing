@@ -1,0 +1,108 @@
+/**
+ * The projects behind the menu's highlighted words: each word opens a card with the project's image (or video), what was
+ * built and the stack. Facts from the LinkedIn experience section and the Kpler CV (2026-10-14).
+ *
+ * Images are 2:1 crops of the screens in endlessstudio/conversaciones/kpler-cv/assets/work (the LinkedIn profile's
+ * project media); Marxan has no large one there, so it keeps the stand-in from marxanplanning.org. archaeo.studio is the
+ * user's screen recording (5 s, re-encoded to 1088×544 webm + mp4, poster = its first frame), played only while its card
+ * is open; the site sits behind a login, so that word has no link (a hint without `href` still opens its card).
+ */
+export interface Hint {
+  word: string;
+  project: string;
+  /** who · when · role */
+  meta: string;
+  /** what was built, technically, in a sentence */
+  work: string;
+  stack: string[];
+  href?: string;
+  /** a still, or the poster when there is a video */
+  image: string;
+  /** plays while the card is open */
+  video?: { webm: string; mp4: string };
+}
+
+export const hint = {
+  climate: {
+    word: "climate commitments",
+    project: "Climate Watch",
+    meta: "Vizzuality · 2018 · front end",
+    work: "A shared component library behind Climate Watch and its India and Indonesia explorers: custom charts for climate indicators, and dashboards users assemble themselves.",
+    stack: ["React", "Redux", "Redux-Thunk", "D3", "Recharts", "React Simple Maps"],
+    href: "https://www.climatewatchdata.org/",
+    image: "/projects/climate-watch-ndc.webp",
+  },
+  soy: {
+    word: "soy",
+    project: "Trase",
+    meta: "Vizzuality · 2019 · front end",
+    work: "Redesigns, refactors and the supply-chain flow diagrams that follow soy from Brazilian municipalities to importers, tuned to stay fast.",
+    stack: ["React", "Redux", "Redux-Saga", "D3", "Mapbox GL", "Turf"],
+    href: "https://trase.earth/",
+    image: "/projects/trase-soy.webp",
+  },
+  marxan: {
+    word: "protected areas",
+    project: "Marxan Cloud",
+    meta: "Vizzuality · 2021 · front end",
+    work: "Set the project up from scratch: configuration, CI automations, and the component library and docs (Playbook) the interface is built from.",
+    stack: ["TypeScript", "Next.js", "React", "Redux", "deck.gl", "Mapbox GL", "Tailwind", "GitHub Actions"],
+    href: "https://marxanplanning.org/",
+    image: "/projects/marxan.webp",
+  },
+  species: {
+    word: "species",
+    project: "Half-Earth Project Map",
+    meta: "Vizzuality · 2018–2022 · technical lead",
+    work: "Led the rebuild from Cesium to an ArcGIS JS app: the architecture from scratch, scalability and performance baselines, a team of four developers.",
+    stack: ["ArcGIS JS", "React", "Redux", "D3", "PixiJS", "WebGL", "Service Workers", "Cypress"],
+    href: "https://map.half-earthproject.org/",
+    image: "/projects/half-earth-globe.webp",
+  },
+  shade: {
+    word: "shade",
+    project: "Tree Equity Score",
+    meta: "endlessstudio for American Forests · 2022–",
+    work: "National explorer, planting scenario planner and locality reports, on vector tiles covering every US neighborhood, down to the parcel.",
+    stack: ["Next.js", "Blitz.js", "Turborepo", "Mapbox GL", "PMTiles", "Tippecanoe", "Tegola", "D3", "Tailwind", "Flightcontrol"],
+    href: "https://www.treeequityscore.org/",
+    image: "/projects/tree-equity-heat.webp",
+  },
+  vessel: {
+    word: "vessel",
+    project: "Global Fishing Watch",
+    meta: "endlessstudio · 2022–2025 · front end",
+    work: "Worked on the map's move from MapLibre to deck.gl, with custom GPU shaders and binary data, for exploring single vessels and patterns across thousands of them.",
+    stack: ["deck.gl", "WebGL shaders", "React", "Next.js", "Nx", "Terraform", "Google Cloud"],
+    href: "https://globalfishingwatch.org/map",
+    image: "/projects/gfw-fishing.webp",
+  },
+  // the timeline shows one card per milestone: the maps and the pipeline together
+  treeEquity: {
+    word: "Tree Equity Score",
+    project: "Tree Equity Score",
+    meta: "endlessstudio for American Forests · 2022–",
+    work: "The national explorer, planting scenario planner and locality reports, and the Python pipeline behind them: shapefiles to GeoJSONL and PMTiles, with schema checks and feature counts validated from source to output.",
+    stack: ["Next.js", "Mapbox GL", "PMTiles", "Tippecanoe", "Tegola", "Python", "GeoPandas", "Shapely"],
+    href: "https://www.treeequityscore.org/",
+    image: "/projects/tree-equity-heat.webp",
+  },
+  pipeline: {
+    word: "pipeline",
+    project: "Tree Equity Score · data pipeline",
+    meta: "endlessstudio for American Forests · 2022–",
+    work: "Owns the Python pipeline from shapefiles to GeoJSONL and PMTiles, with schema checks and feature counts validated from source to output.",
+    stack: ["Python", "pandas", "GeoPandas", "Shapely", "GeoJSONL", "Tippecanoe", "PMTiles"],
+    href: "https://www.treeequityscore.org/",
+    image: "/projects/tree-equity-explorer.webp",
+  },
+  archaeo: {
+    word: "archaeo.studio",
+    project: "archaeo.studio",
+    meta: "endlessstudio · current practice",
+    work: "A data platform for archaeology with spatial views, DuckDB queries and Python notebooks, built with an AI-centred workflow: domain model, architecture, implementation, verification.",
+    stack: ["DuckDB", "Python notebooks", "spatial views", "domain modelling", "AI-assisted engineering"],
+    image: "/projects/archaeo-studio-poster.webp",
+    video: { webm: "/projects/archaeo-studio.webm", mp4: "/projects/archaeo-studio.mp4" },
+  },
+} satisfies Record<string, Hint>;

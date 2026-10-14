@@ -1,0 +1,75 @@
+---
+/**
+ * Menu copy, third option (2026-10-14): two paragraphs on Javi Abia's path, from Vizzuality to endlessstudio. Each
+ * project hides behind a word (ProjectHint): hovering or focusing it brings up a card with the project's image, what was
+ * built and the stack, while the rest of the page steps back. Clicking opens the project.
+ * Pick the menu text with menuCopy="timeline" | "bio" | "stories" | "lead" on <SisyphusScene> in pages/index.astro.
+ */
+import ProjectHint from "./ProjectHint.astro";
+import { hint, type Hint } from "../data/projects";
+
+const paragraphs: (string | Hint)[][] = [
+  [
+    "Javi Abia has spent more than a decade turning data that is hard to read into maps people can act on. He started out building front ends and interfaces, learned at Novelti to make live sensor streams legible, then spent four years at Vizzuality on tools for some of the planet's hardest questions: whether countries are keeping their ",
+    hint.climate,
+    ", where Brazilian ",
+    hint.soy,
+    " comes from and who trades it, how planners can draw ",
+    hint.marxan,
+    " that meet their targets at the lowest cost and, as technical lead, where thousands of ",
+    hint.species,
+    " live and which places would protect the most of them.",
+  ],
+  [
+    "Since 2022 he has worked independently as endlessstudio. For American Forests he builds the map of which city blocks live without ",
+    hint.shade,
+    ", so city halls and neighborhood groups can argue for planting where it matters, and owns the Python ",
+    hint.pipeline,
+    " that turns raw shapefiles into its tiles, checked feature by feature from source to output. For Global Fishing Watch he helped move the ocean map onto the GPU, so anyone can follow a single ",
+    hint.vessel,
+    " or years of fishing across the sea. Now he is building ",
+    hint.archaeo,
+    ", a workspace that keeps an excavation's records, maps and research together, with an AI-assisted way of working grounded in domain models and explicit architecture. The tools keep changing; the purpose doesn't: fast, open, honest interfaces that put scientific data in the hands of the people deciding about forests, coasts and cities, because data about the commons should work for the common good.",
+  ],
+];
+---
+
+<!-- menu-lead: shares the lead's reveal transition when the menu opens -->
+<div class="menu-lead menu-bio">
+  {
+    // one line per paragraph on purpose: Astro keeps template whitespace, and a break would put spaces before punctuation
+    paragraphs.map((parts) => (
+      <p>{parts.map((part) => (typeof part === "string" ? part : <ProjectHint hint={part} />))}</p>
+    ))
+  }
+</div>
+
+<script>
+  import { initProjectHints } from "../scripts/project-hints";
+  initProjectHints();
+</script>
+
+<style>
+  .menu-bio {
+    display: grid;
+    gap: clamp(0.8rem, 2vh, 1.2rem);
+    max-width: 46rem;
+    font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-align: left;
+  }
+
+  .menu-bio p {
+    margin: 0;
+    text-wrap: pretty;
+    color: rgba(241, 233, 210, 0.82);
+    transition: color 300ms ease;
+  }
+
+  /* spotlight: while a word is hovered or focused, the rest of the text steps back (ProjectHint dims the page around) */
+  .menu-bio:has(.bio-hint:hover, .bio-hint:focus-visible) p {
+    color: rgba(241, 233, 210, 0.3);
+  }
+</style>

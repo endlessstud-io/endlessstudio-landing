@@ -555,6 +555,7 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
   };
   const nearPt = new THREE.Vector3();
   const farPt = new THREE.Vector3();
+  const lastTo = new THREE.Vector3(); // menu.to on the previous frame, to roll the stone when the anchor moves
   /** Where the stone goes: resting on the flat plate under the anchor's centre, its diameter spanning the anchor's width. */
   const menuTarget = () => {
     const cw = canvas.clientWidth;
@@ -572,7 +573,7 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
       diameterPx = a.width;
     }
     const worldPerPx = (camera.right - camera.left) / cw; // orthographic: constant across the screen
-    menu.toScale = clamp((diameterPx * worldPerPx) / (2 * r), 0.5, 6);
+    menu.toScale = clamp((diameterPx * worldPerPx) / (2 * r), 0.2, 6);
     const h = r * menu.toScale; // centre height when resting on the flattened plate
     nearPt.set(x, y, -1).unproject(camera);
     farPt.set(x, y, 1).unproject(camera).sub(nearPt).normalize();
@@ -599,13 +600,20 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
     const e = smoothstep(menu.k);
     terrain.scale.y = Math.max(M.minRelief, 1 - e);
     terrainMaterial.opacity = 1 - e * (1 - M.ghost);
-    menuTarget(); // follows layout changes while the menu is up
+    lastTo.copy(menu.to);
+    menuTarget(); // follows layout changes while the menu is up, and the anchor when it moves (the timeline)
     stone.position.lerpVectors(menu.from, menu.to, e);
     stone.position.y += Math.sin(e * Math.PI) * M.lift;
     stone.scale.setScalar(THREE.MathUtils.lerp(menu.fromScale, menu.toScale, e));
     if (!reduceMotion) {
       stone.rotateOnWorldAxis(menu.rollAxis, M.tumble * Math.sin(e * Math.PI) * dt);
       stone.rotateOnWorldAxis(up, M.spin * e * dt);
+      // landed: it rolls wherever the anchor takes it
+      if (menu.k === 1) {
+        motion.subVectors(menu.to, lastTo);
+        const d = motion.length();
+        if (d > 1e-6) stone.rotateOnWorldAxis(axis.crossVectors(up, motion).normalize(), d / (r * menu.toScale));
+      }
     }
   }
 

@@ -1,0 +1,597 @@
+---
+/**
+ * Menu copy, fourth option (2026-10-14): the work as a climb. An elevation profile of Etna along the stone's own path
+ * (base → summit, a little past it) is the timeline; milestones sit on it, and the scene's stone, small, rests on the
+ * current one (it follows the [data-stone-anchor] box, and rolls when it moves). Wheel, ← → / ↑ ↓, a horizontal swipe
+ * or a click on a milestone moves it. Below the line, two columns: the milestone's text, and its project card (linked
+ * to the project when it has a link; a video plays while its milestone is current).
+ *
+ * The profile is sampled at build time from public/terrain/etna.bin along the climb path of sisyphus.ts: START and
+ * WOBBLE copy CONFIG.stone.start and CONFIG.stone.wobble, keep them in sync. The path's first stretch rises over a
+ * bump and dips into a gully, so the line starts at that low point and only climbs from there.
+ */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import ProjectCard from "./ProjectCard.astro";
+import { hint, type Hint } from "../data/projects";
+
+interface Milestone {
+  /** short label under the dot; omitted when the year repeats */
+  label?: string;
+  /** mono line over the text */
+  when: string;
+  text: string;
+  card?: Hint;
+}
+
+const milestones: Milestone[] = [
+  {
+    label: "2014",
+    when: "2014 · Freelance",
+    text: "Javi Abia has spent more than a decade turning data that is hard to read into maps people can act on. It began in 2014: front ends and interface design as a freelancer, and seven months of full-stack work at Credia.",
+  },
+  {
+    label: "2016",
+    when: "2016 · Novelti",
+    text: "At Novelti, in Madrid, he learned to make live data legible: near-real-time dashboards where people could see patterns and anomalies in the streams from connected devices.",
+  },
+  {
+    label: "2018",
+    when: "2018 · Vizzuality · Climate Watch",
+    text: "He joined Vizzuality to work on Climate Watch, the open platform that tracks whether countries are keeping their climate commitments, building the shared charts and dashboards behind it and its India and Indonesia explorers.",
+    card: hint.climate,
+  },
+  {
+    when: "2018–2022 · Vizzuality · Half-Earth Project Map",
+    text: "As technical lead of the Half-Earth Project Map he rebuilt it from Cesium on ArcGIS and led four developers, to show where thousands of species live and which places would protect the most of them.",
+    card: hint.species,
+  },
+  {
+    label: "2019",
+    when: "2019 · Vizzuality · Trase",
+    text: "On Trase he worked on the flows that follow Brazilian soy from the municipalities where it grows to the companies and countries that buy it, and the deforestation risk it carries.",
+    card: hint.soy,
+  },
+  {
+    label: "2021",
+    when: "2021 · Vizzuality · Marxan Cloud",
+    text: "For Marxan Cloud he laid the foundations (project setup, automation, the component library) of an app that helps planners draw protected areas that meet their targets at the lowest cost.",
+    card: hint.marxan,
+  },
+  {
+    label: "2022",
+    when: "2022 · endlessstudio · Tree Equity Score",
+    text: "In 2022 he went independent as endlessstudio. For American Forests he builds the map of which city blocks live without shade, so city halls and neighborhood groups can argue for planting where it matters, and owns the Python pipeline that turns raw shapefiles into its tiles.",
+    card: hint.treeEquity,
+  },
+  {
+    when: "2022–2025 · endlessstudio · Global Fishing Watch",
+    text: "For Global Fishing Watch he helped move the ocean map onto the GPU, with custom shaders and binary data, so anyone can follow a single vessel or years of fishing across the sea.",
+    card: hint.vessel,
+  },
+  {
+    label: "now",
+    when: "Now · endlessstudio · archaeo.studio",
+    text: "Now he is building archaeo.studio, a workspace that keeps an excavation's records, maps and research together, with an AI-assisted way of working grounded in domain models and explicit architecture.",
+    card: hint.archaeo,
+  },
+  {
+    label: "next",
+    when: "Next",
+    text: "The tools keep changing; the purpose doesn't: fast, open, honest interfaces that put scientific data in the hands of the people deciding about forests, coasts and cities. Data about the commons should work for the common good.",
+  },
+];
+
+// --- the profile: elevation along the climb path, sampled from the baked terrain
+const START = { u: 0.27, v: 0.73 }; // CONFIG.stone.start
+const WOBBLE = { amplitude: 0.045, periods: 1.5 }; // CONFIG.stone.wobble
+const PAST_SUMMIT = 1.14; // the line runs a little past the summit, so the peak reads as a peak
+const SAMPLES = 200;
+
+const meta = JSON.parse(readFileSync(join(process.cwd(), "public/terrain/etna.json"), "utf8"));
+const raw = readFileSync(join(process.cwd(), "public/terrain/etna.bin"));
+const data = new Uint16Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
+const n: number = meta.size;
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+const sample = (u: number, v: number) => {
+  const x = clamp01(u) * (n - 1);
+  const y = clamp01(v) * (n - 1);
+  const x0 = Math.floor(x);
+  const y0 = Math.floor(y);
+  const x1 = Math.min(x0 + 1, n - 1);
+  const y1 = Math.min(y0 + 1, n - 1);
+  const fx = x - x0;
+  const fy = y - y0;
+  const h0 = data[y0 * n + x0] * (1 - fx) + data[y0 * n + x1] * fx;
+  const h1 = data[y1 * n + x0] * (1 - fx) + data[y1 * n + x1] * fx;
+  return h0 * (1 - fy) + h1 * fy;
+};
+let top = 0;
+for (let i = 1; i < data.length; i++) if (data[i] > data[top]) top = i;
+const summit = { u: (top % n) / (n - 1), v: Math.floor(top / n) / (n - 1) };
+const toSummit = Math.hypot(summit.u - START.u, summit.v - START.v);
+const dir = { u: (summit.u - START.u) / toSummit, v: (summit.v - START.v) / toSummit };
+const smooth = (t: number) => t * t * (3 - 2 * t);
+const elevationAt = (s: number) => {
+  const k = clamp01(s / toSummit);
+  const w = WOBBLE.amplitude * Math.sin(k * WOBBLE.periods * Math.PI * 2) * (1 - smooth(clamp01((k - 0.7) / 0.3)));
+  return sample(START.u + dir.u * s - dir.v * w, START.v + dir.v * s + dir.u * w);
+};
+// start at the lowest point of the first half, so the timeline never goes downhill before the summit
+let sMin = 0;
+for (let s = 0; s < toSummit / 2; s += toSummit / 400) if (elevationAt(s) < elevationAt(sMin)) sMin = s;
+const sMax = toSummit * PAST_SUMMIT;
+const sAt = (i: number) => sMin + (i / (SAMPLES - 1)) * (sMax - sMin);
+const elev = Array.from({ length: SAMPLES }, (_, i) => elevationAt(sAt(i)));
+const eased = elev.map((_, i) => {
+  const near = elev.slice(Math.max(0, i - 2), i + 3); // a five-sample average irons out the 78 m stair steps
+  return near.reduce((a, b) => a + b, 0) / near.length;
+});
+const lo = Math.min(...eased);
+const hi = Math.max(...eased);
+const r2 = (x: number) => Math.round(x * 100) / 100;
+// [x %, y %] inside the plot box; the plot stretches, so these stay valid at any size
+const profile = eased.map((e, i) => [r2(1 + (i / (SAMPLES - 1)) * 98), r2(8 + (1 - (e - lo) / (hi - lo)) * 84)]);
+const line = "M" + profile.map(([x, y]) => `${x * 10} ${y * 2.2}`).join(" L");
+const area = `${line} L${profile[SAMPLES - 1][0] * 10} 220 L${profile[0][0] * 10} 220 Z`;
+
+// milestones evenly spaced along the climb, the last one on the summit; `at` = fractional index into the profile
+const at = milestones.map((_, i) => {
+  const s = sMin + (toSummit - sMin) * (0.03 + (0.97 * i) / (milestones.length - 1));
+  return r2(((s - sMin) / (sMax - sMin)) * (SAMPLES - 1));
+});
+const pointAt = (f: number) => {
+  const i = Math.min(Math.floor(f), SAMPLES - 2);
+  const t = f - i;
+  return [r2(profile[i][0] + (profile[i + 1][0] - profile[i][0]) * t), r2(profile[i][1] + (profile[i + 1][1] - profile[i][1]) * t)];
+};
+const dots = at.map(pointAt);
+const pad = (i: number) => String(i + 1).padStart(2, "0");
+---
+
+<!-- the line and its milestones; clicks in here never close the menu -->
+<div class="timeline" data-timeline data-keep-menu data-profile={JSON.stringify(profile)} data-at={JSON.stringify(at)}>
+  <div class="tl-plot">
+    <svg class="tl-profile" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="tl-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f1e9d2" stop-opacity="0.14"></stop>
+          <stop offset="1" stop-color="#f1e9d2" stop-opacity="0"></stop>
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#tl-fill)"></path>
+      <path class="tl-line" d={line}></path>
+    </svg>
+    {
+      milestones.map((m, i) => (
+        <button
+          class:list={["tl-dot", { "is-current": i === 0 }]}
+          type="button"
+          style={`left: ${dots[i][0]}%; top: ${dots[i][1]}%`}
+          data-dot={i}
+          aria-label={m.when}
+          aria-current={i === 0 ? "step" : undefined}
+        >
+          {m.label && <span>{m.label}</span>}
+        </button>
+      ))
+    }
+    <!-- the scene's stone sits on this box: bottom centre on the line, as wide as it is -->
+    <div class="tl-stone" data-stone-anchor style={`left: ${dots[0][0]}%; top: ${dots[0][1]}%`} aria-hidden="true"></div>
+  </div>
+  <p class="tl-help" aria-hidden="true">
+    <span data-counter>01 / {pad(milestones.length - 1)}</span><span>scroll or ← → to climb</span>
+  </p>
+</div>
+
+<!-- menu-lead: shares the lead's reveal transition when the menu opens. Text left, the milestone's card right; each
+     column stacks all milestones in one grid cell, so the layout never jumps -->
+<div class="menu-lead tl-content">
+  <div class="tl-steps" aria-live="polite">
+    {
+      milestones.map((m, i) => (
+        <article class:list={["tl-step", { "is-current": i === 0 }]} data-step-text={i} aria-hidden={i === 0 ? undefined : "true"}>
+          <p class="tl-when">{m.when}</p>
+          <p class="tl-text">{m.text}</p>
+        </article>
+      ))
+    }
+  </div>
+  <div class="tl-cards">
+    {
+      milestones.map((m, i) => {
+        if (!m.card) return null;
+        const Tag = m.card.href ? "a" : "div";
+        return (
+          <Tag
+            class:list={["tl-card", { "is-current": i === 0 }]}
+            data-step-card={i}
+            href={m.card.href}
+            target={m.card.href && "_blank"}
+            rel={m.card.href && "noopener"}
+            aria-label={m.card.href ? `${m.card.project} (opens in a new tab)` : undefined}
+          >
+            <ProjectCard project={m.card} />
+          </Tag>
+        );
+      })
+    }
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-timeline]");
+  const scene = root?.closest<HTMLElement>(".sisyphus");
+  const stone = root?.querySelector<HTMLElement>("[data-stone-anchor]");
+  if (root && scene && stone) {
+    const profile: [number, number][] = JSON.parse(root.dataset.profile ?? "[]");
+    const at: number[] = JSON.parse(root.dataset.at ?? "[]");
+    const dots = [...root.querySelectorAll<HTMLButtonElement>("[data-dot]")];
+    const texts = [...document.querySelectorAll<HTMLElement>("[data-step-text]")];
+    const cards = [...document.querySelectorAll<HTMLElement>("[data-step-card]")];
+    const counter = root.querySelector<HTMLElement>("[data-counter]");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const last = at.length - 1;
+    const pad = (i: number) => String(i + 1).padStart(2, "0");
+    let current = 0;
+    let pos = at[0]; // the stone's place on the profile, fractional sample index
+    let raf = 0;
+
+    const put = (f: number) => {
+      const i = Math.min(Math.floor(f), profile.length - 2);
+      const t = f - i;
+      stone.style.left = `${profile[i][0] + (profile[i + 1][0] - profile[i][0]) * t}%`;
+      stone.style.top = `${profile[i][1] + (profile[i + 1][1] - profile[i][1]) * t}%`;
+    };
+
+    const show = () => {
+      dots.forEach((d, i) => {
+        d.classList.toggle("is-current", i === current);
+        d.classList.toggle("is-passed", i < current);
+        if (i === current) d.setAttribute("aria-current", "step");
+        else d.removeAttribute("aria-current");
+      });
+      texts.forEach((t, i) => {
+        t.classList.toggle("is-current", i === current);
+        if (i === current) t.removeAttribute("aria-hidden");
+        else t.setAttribute("aria-hidden", "true");
+      });
+      cards.forEach((c) => c.classList.toggle("is-current", Number(c.dataset.stepCard) === current));
+      if (counter) counter.textContent = `${pad(current)} / ${pad(last)}`;
+      playCurrent();
+    };
+
+    const isOpen = () => scene.classList.contains("is-menu-open");
+
+    /** Only the current card's video plays, and only while the menu is open. */
+    const playCurrent = () => {
+      for (const c of cards) {
+        const video = c.querySelector("video");
+        if (!video) continue;
+        if (Number(c.dataset.stepCard) === current && isOpen() && !still) video.play().catch(() => {});
+        else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      }
+    };
+    new MutationObserver(playCurrent).observe(scene, { attributes: true, attributeFilter: ["class"] });
+
+    /** Roll the stone along the profile to milestone `next`: longer trips take a little longer. */
+    const go = (next: number) => {
+      next = Math.max(0, Math.min(last, next));
+      if (next === current) return;
+      const steps = Math.abs(next - current);
+      current = next;
+      show();
+      cancelAnimationFrame(raf);
+      const from = pos;
+      const to = at[next];
+      if (still) {
+        pos = to;
+        put(pos);
+        return;
+      }
+      const duration = Math.min(700 + 160 * (steps - 1), 1800);
+      const t0 = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - t0) / duration);
+        const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+        pos = from + (to - from) * e;
+        put(pos);
+        if (k < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+
+    dots.forEach((d, i) => d.addEventListener("click", () => go(i)));
+
+    document.addEventListener("keydown", (e) => {
+      if (!isOpen() || e.altKey || e.ctrlKey || e.metaKey) return;
+      const step = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, ArrowLeft: -1, ArrowUp: -1, PageUp: -1 }[e.key];
+      if (step) go(current + step);
+      else if (e.key === "Home") go(0);
+      else if (e.key === "End") go(last);
+      else return;
+      e.preventDefault();
+    });
+
+    // one step per wheel gesture: locked after a step until the wheel rests (trackpad inertia keeps it locked),
+    // or for at most 900 ms when a mouse wheel keeps turning
+    let acc = 0;
+    let locked = 0;
+    let rest = 0;
+    document.addEventListener(
+      "wheel",
+      (e) => {
+        if (!isOpen()) return;
+        e.preventDefault();
+        window.clearTimeout(rest);
+        rest = window.setTimeout(() => {
+          locked = 0;
+          acc = 0;
+        }, 160);
+        if (locked && performance.now() - locked < 900) return;
+        acc += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+        if (Math.abs(acc) > 30) {
+          go(current + Math.sign(acc));
+          locked = performance.now();
+          acc = 0;
+        }
+      },
+      { passive: false },
+    );
+
+    // touch: a horizontal swipe (vertical ones are left to scrolling)
+    let x0 = 0;
+    let y0 = 0;
+    document.addEventListener("touchstart", (e) => {
+      x0 = e.touches[0].clientX;
+      y0 = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener("touchend", (e) => {
+      if (!isOpen()) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      const dy = e.changedTouches[0].clientY - y0;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+  }
+</script>
+
+<style>
+  .timeline {
+    display: grid;
+    gap: 0.6rem;
+    width: min(72rem, 90vw);
+    transition: opacity 300ms ease;
+  }
+
+  .tl-plot {
+    position: relative;
+    height: clamp(7rem, 20vh, 12rem);
+  }
+
+  .tl-profile {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .tl-line {
+    fill: none;
+    stroke: rgba(241, 233, 210, 0.75);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* milestones: a generous hit area around a small dot; the label hangs below the line */
+  .tl-dot {
+    position: absolute;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    transform: translate(-50%, -50%);
+    color: rgba(241, 233, 210, 0.5);
+  }
+
+  .tl-dot::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: var(--landing-teal);
+    transform: translate(-50%, -50%);
+    transition:
+      background 300ms ease,
+      border-color 300ms ease,
+      transform 300ms ease;
+  }
+
+  .tl-dot.is-passed {
+    color: var(--landing-cream);
+  }
+
+  .tl-dot.is-passed::before {
+    background: currentColor;
+  }
+
+  .tl-dot.is-current {
+    color: var(--landing-pink);
+  }
+
+  .tl-dot.is-current::before {
+    background: currentColor;
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+
+  .tl-dot:focus-visible {
+    outline: 1px solid var(--landing-mist);
+    outline-offset: 0;
+    border-radius: 50%;
+  }
+
+  .tl-dot span {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-top: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    transition: color 300ms ease;
+  }
+
+  .tl-dot.is-current span {
+    color: var(--landing-cream);
+  }
+
+  .tl-stone {
+    position: absolute;
+    width: clamp(22px, 2.4vw, 32px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -100%);
+    pointer-events: none;
+  }
+
+  /* without WebGL there is no scene stone: a pink dot stands in */
+  :global(.sisyphus.is-static) .tl-stone {
+    border-radius: 50%;
+    background: var(--landing-pink);
+  }
+
+  .tl-help {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(241, 233, 210, 0.45);
+  }
+
+  /* below the line: text left, the milestone's card right */
+  .tl-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+    width: min(64rem, 90vw);
+    max-width: none; /* .menu-lead caps it at 34rem */
+    text-align: left;
+  }
+
+  .tl-steps,
+  .tl-cards {
+    display: grid;
+  }
+
+  .tl-step,
+  .tl-card {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(0.4rem);
+    transition:
+      opacity 280ms ease,
+      transform 360ms ease,
+      visibility 0s linear 360ms;
+  }
+
+  .tl-step.is-current,
+  .tl-card.is-current {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 420ms ease 120ms,
+      transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 120ms;
+  }
+
+  .tl-card {
+    align-self: center;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* the left column already names the project and the years */
+  .tl-card :global(:is(.bio-name, .bio-meta)) {
+    display: none;
+  }
+
+  .tl-card :global(.bio-card) {
+    transition: border-color 240ms ease;
+  }
+
+  a.tl-card:hover :global(.bio-card),
+  a.tl-card:focus-visible :global(.bio-card) {
+    border-color: rgba(241, 233, 210, 0.45);
+  }
+
+  a.tl-card:focus-visible {
+    outline: none;
+  }
+
+  .tl-when {
+    margin: 0 0 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--landing-pink);
+  }
+
+  .tl-text {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.45vw, 1.3rem);
+    font-weight: 400;
+    line-height: 1.5;
+    text-wrap: pretty;
+    color: rgba(241, 233, 210, 0.86);
+  }
+
+  /* the line sits higher than the old emblem: its left end is low, clear of the wordmark */
+  :global(.menu:has(.timeline)) {
+    padding-top: clamp(3.5rem, 9vh, 6rem);
+    padding-bottom: 3rem;
+  }
+
+  /* narrow screens: the card goes under the text */
+  @media (max-width: 860px) {
+    .tl-content {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  /* narrow screens: only the current milestone keeps its label */
+  @media (max-width: 600px) {
+    .tl-dot:not(.is-current) span {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tl-step,
+    .tl-step.is-current,
+    .tl-card,
+    .tl-card.is-current {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

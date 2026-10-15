@@ -1,6 +1,71 @@
 # endlessstudio — website
 
-Astro 5 + React + Tailwind v4.
+Astro 6 + React + Tailwind v4. Requires Node.js 22.12+.
+
+## Deployment — GitHub Pages
+
+Production URL: <https://endlessstud.io>. `.github/workflows/deploy.yml` builds with
+Node.js 22 and `npm ci`, then publishes only `dist/` on pushes to `main` or a manual
+run from the Actions tab on `main`. No deployment secrets are needed.
+
+### One-time GitHub setup
+
+1. Keep `endlessstud-io/endlessstudio-landing` **public** to use Pages on the
+   organization's GitHub Free plan. Making it private would require upgrading
+   the organization to GitHub Team or Enterprise to keep Pages available.
+   Never commit credentials or private content to this repository.
+2. In [repository Settings → Pages](https://github.com/endlessstud-io/endlessstudio-landing/settings/pages),
+   select **GitHub Actions** as the build source.
+3. Set **Custom domain** to `endlessstud.io` and save it **before changing DNS**.
+   GitHub recommends [verifying domain ownership](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages)
+   in the organization settings to prevent domain takeovers.
+4. Commit and push the deployment files to `main`, then confirm that the
+   **Deploy to GitHub Pages** workflow succeeds.
+5. Update DNS as below. Once GitHub finishes its DNS check and provisions the
+   certificate, enable **Enforce HTTPS** in Pages settings. DNS propagation and
+   certificate availability can take up to 24 hours.
+
+`astro.config.mjs` sets `site` to the custom domain and intentionally has no
+repository `base` prefix: pages and assets are served at the domain root.
+`public/CNAME` records the intended domain, but GitHub Actions deployments ignore
+that file for domain configuration — the Pages setting above is required.
+
+### DNS cutover
+
+At the DNS provider for `endlessstud.io`, replace the existing website records
+with the following (one record per row; `@` means the apex domain):
+
+| Type | Name | Value |
+| --- | --- | --- |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `endlessstud-io.github.io` |
+
+This moves website traffic away from the previous host. Replace conflicting
+website A/AAAA/ALIAS/ANAME/CNAME records, but keep unrelated MX/TXT records for
+email and domain verification. Do not add wildcard records. If enabling IPv6,
+use all four GitHub Pages AAAA values: `2606:50c0:8000::153`,
+`2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`.
+The `www` CNAME must not include the repository name; GitHub redirects it to the
+configured apex domain.
+
+Verify after propagation:
+
+```sh
+dig +short endlessstud.io A
+dig +short endlessstud.io AAAA
+dig +short www.endlessstud.io CNAME
+curl -I https://endlessstud.io
+curl -I https://www.endlessstud.io
+```
+
+For a local production check, run `npm ci && npm run build`, then
+`npm run preview`. Check `/`, `/story/`, and the terrain/project assets.
+
+References: [Astro deployment guide](https://docs.astro.build/en/guides/deploy/github/)
+and [GitHub custom-domain/DNS guide](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
 
 ## Landing (`/`)
 

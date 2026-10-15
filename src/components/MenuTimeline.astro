@@ -24,6 +24,8 @@ interface Milestone {
   text: string;
   /** the projects' pictures, shown in turn when there are several; their stacks go under the text */
   cards?: Hint[];
+  /** a recorded talk about the work, linked under the text */
+  talk?: { title: string; by: string; href: string };
   /** the stone waits here when the menu opens */
   start?: true;
 }
@@ -55,6 +57,11 @@ const milestones: Milestone[] = [
     when: "2022–2025 · endlessstudio · Global Fishing Watch",
     text: "In 2022 he went independent as endlessstudio. For Global Fishing Watch he helped move the ocean map onto the GPU, with custom shaders and binary data, so anyone can follow a single vessel or years of fishing across the sea.",
     cards: [hint.vessel],
+    talk: {
+      title: "Migrating visualizations from MapLibre to deck.gl",
+      by: "OpenJS Foundation · YouTube",
+      href: "https://youtu.be/eqTRG3tABZE",
+    },
     start: true,
   },
   {
@@ -207,6 +214,18 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
         >
           <p class="tl-when">{m.when}</p>
           <p class="tl-text">{m.text}</p>
+          {m.talk && (
+            <a
+              class="tl-talk"
+              href={m.talk.href}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Talk: ${m.talk.title}, ${m.talk.by} (opens in a new tab)`}
+            >
+              <span class="tl-talk-title">{m.talk.title}</span>
+              <span class="tl-talk-by">{m.talk.by} ↗</span>
+            </a>
+          )}
           {m.cards && (
             <ul class="tl-stack" aria-label="Stack">
               {stackOf(m).map((t) => (
@@ -615,13 +634,14 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     color: rgba(241, 233, 210, 0.45);
   }
 
-  /* below the line: text left, the milestone's card right, as wide as the line allows */
+  /* below the line: text left, the milestone's card right, a little wider than the line (92vw stays inside the
+     menu's padding even with a scrollbar) */
   .tl-content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, clamp(28rem, 46vw, 44rem));
+    grid-template-columns: minmax(0, 1fr) minmax(0, clamp(28rem, 48vw, 48rem));
     gap: clamp(2rem, 4vw, 3.5rem);
     align-items: center;
-    width: min(72rem, 90vw);
+    width: min(86rem, 92vw);
     max-width: none; /* .menu-lead caps it at 34rem */
     text-align: left;
   }
@@ -729,6 +749,43 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     color: rgba(241, 233, 210, 0.86);
   }
 
+  /* a talk about the work: the title, underlined in the milestones' pink, then who published it */
+  .tl-talk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.7rem;
+    width: fit-content;
+    margin-top: 1.1rem;
+    color: var(--landing-cream);
+    text-decoration: none;
+  }
+
+  .tl-talk-title {
+    border-bottom: 1px solid var(--landing-pink);
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: rgba(241, 233, 210, 0.86);
+    transition: color 240ms ease;
+  }
+
+  .tl-talk:hover .tl-talk-title,
+  .tl-talk:focus-visible .tl-talk-title {
+    color: var(--landing-cream);
+  }
+
+  .tl-talk:focus-visible {
+    outline: none;
+  }
+
+  .tl-talk-by {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(241, 233, 210, 0.55);
+  }
+
   /* the milestone's stack under its text, as chips like the cards' */
   .tl-stack {
     display: flex;
@@ -753,6 +810,7 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
   /* the line sits higher than the old emblem: its left end is low, clear of the wordmark */
   :global(.menu:has(.timeline)) {
     padding-top: clamp(3.5rem, 9vh, 6rem);
+    padding-inline: clamp(1rem, 3vw, 2.5rem);
   }
 
   /* narrow screens: the card goes under the text */
@@ -760,6 +818,7 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     .tl-content {
       grid-template-columns: minmax(0, 1fr);
       gap: 1.5rem;
+      width: 90vw;
     }
 
     .tl-steps {

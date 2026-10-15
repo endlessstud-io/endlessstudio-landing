@@ -7,7 +7,9 @@
  * user's screen recording (a 21 s scroll through its landing, cropped and re-encoded to 1280×640 webm + mp4, poster =
  * its first frame), played only while its card is open; the site sits behind a login, so that word has no link (a hint
  * without `href` still opens its card). Global Fishing Watch plays the user's recording of the map too (its first 19 s,
- * 832×416, poster = first frame); gfw-fishing.webp is the older still.
+ * 1920×960 at 30 fps, silent fast-start H.264, poster = first frame). Re-encode from the original with
+ * scripts/encode-project-video.swift; the old 832 px export was too small for the wide timeline card.
+ * gfw-fishing.webp is the older still.
  */
 export interface Hint {
   word: string;
@@ -20,8 +22,8 @@ export interface Hint {
   href?: string;
   /** a still, or the poster when there is a video */
   image: string;
-  /** plays while the card is open */
-  video?: { webm: string; mp4: string };
+  /** plays while the card is open; WebM is an optional alternative to the MP4 */
+  video?: { webm?: string; mp4: string };
 }
 
 export const hint = {
@@ -77,8 +79,8 @@ export const hint = {
     work: "Worked on the map's move from MapLibre to deck.gl, with custom GPU shaders and binary data, for exploring single vessels and patterns across thousands of them.",
     stack: ["deck.gl", "WebGL shaders", "React", "Next.js", "Nx", "Terraform", "Google Cloud"],
     href: "https://globalfishingwatch.org/map",
-    image: "/projects/gfw-fishing-poster.webp",
-    video: { webm: "/projects/gfw-fishing.webm", mp4: "/projects/gfw-fishing.mp4" },
+    image: "/projects/gfw-fishing-hq-poster.webp",
+    video: { mp4: "/projects/gfw-fishing-hq.mp4" },
   },
   // the timeline shows one card per milestone: the maps and the pipeline together
   treeEquity: {

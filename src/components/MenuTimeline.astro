@@ -482,7 +482,7 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
   .timeline {
     display: grid;
     gap: 0.6rem;
-    width: min(72rem, 90vw);
+    width: min(72rem, 100%);
     transition: opacity 300ms ease;
   }
 
@@ -634,14 +634,15 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     color: rgba(241, 233, 210, 0.45);
   }
 
-  /* below the line: text left, the milestone's card right, a little wider than the line (92vw stays inside the
-     menu's padding even with a scrollbar) */
+  /* below the line: text left, the milestone's card right, across the whole width inside the menu's margins (up to
+     150rem on very wide screens), centred in the height left between the line and the address */
   .tl-content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, clamp(28rem, 48vw, 48rem));
-    gap: clamp(2rem, 4vw, 3.5rem);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(2rem, 4vw, 5rem);
     align-items: center;
-    width: min(86rem, 92vw);
+    align-self: center;
+    width: min(100%, 150rem);
     max-width: none; /* .menu-lead caps it at 34rem */
     text-align: left;
   }
@@ -685,7 +686,7 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     grid-column: 1 / -1;
     justify-self: center;
     align-self: center;
-    max-width: 40rem;
+    max-width: clamp(36rem, 45vw, 64rem);
     text-align: center;
   }
 
@@ -731,10 +732,11 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     outline: none;
   }
 
+  /* the type grows with wide screens (past ≈ 1340 px), so a line of text keeps about 65 characters as the column widens */
   .tl-when {
     margin: 0 0 0.7rem;
     font-family: var(--font-mono);
-    font-size: 0.66rem;
+    font-size: clamp(0.66rem, 0.55vw, 0.95rem);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--landing-pink);
@@ -742,7 +744,7 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
 
   .tl-text {
     margin: 0;
-    font-size: clamp(1.05rem, 1.45vw, 1.3rem);
+    font-size: clamp(1.05rem, 1.25vw, 2rem);
     font-weight: 400;
     line-height: 1.5;
     text-wrap: pretty;
@@ -756,14 +758,14 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
     align-items: baseline;
     gap: 0.25rem 0.7rem;
     width: fit-content;
-    margin-top: 1.1rem;
+    margin-top: clamp(1.1rem, 1vw, 1.8rem);
     color: var(--landing-cream);
     text-decoration: none;
   }
 
   .tl-talk-title {
     border-bottom: 1px solid var(--landing-pink);
-    font-size: 0.98rem;
+    font-size: clamp(0.98rem, 0.95vw, 1.5rem);
     font-weight: 500;
     color: rgba(241, 233, 210, 0.86);
     transition: color 240ms ease;
@@ -780,7 +782,7 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
 
   .tl-talk-by {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: clamp(0.62rem, 0.5vw, 0.9rem);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgba(241, 233, 210, 0.55);
@@ -790,35 +792,37 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
   .tl-stack {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 1.1rem 0 0;
+    gap: 0.55em;
+    margin: clamp(1.1rem, 1vw, 1.8rem) 0 0;
     padding: 0;
     list-style: none;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: clamp(0.7rem, 0.55vw, 0.95rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .tl-stack li {
-    padding: 0.28rem 0.55rem;
+    padding: 0.4em 0.8em;
     border: 1px solid rgba(241, 233, 210, 0.22);
     border-radius: 2px;
     color: var(--landing-cream);
   }
 
-  /* the line sits higher than the old emblem: its left end is low, clear of the wordmark */
+  /* the line sits higher than the old emblem: its left end is low, clear of the wordmark. The side padding is the
+     content's margin; the second row (the content) takes the height left, and the content centres in it */
   :global(.menu:has(.timeline)) {
+    grid-template-rows: auto 1fr;
+    align-content: stretch;
     padding-top: clamp(3.5rem, 9vh, 6rem);
-    padding-inline: clamp(1rem, 3vw, 2.5rem);
+    padding-inline: clamp(1.25rem, 6vw, 9rem);
   }
 
-  /* narrow screens: the card goes under the text */
+  /* narrow screens: one column, the text over the card */
   @media (max-width: 860px) {
     .tl-content {
       grid-template-columns: minmax(0, 1fr);
       gap: 1.5rem;
-      width: 90vw;
     }
 
     .tl-steps {

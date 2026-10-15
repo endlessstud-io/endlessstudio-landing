@@ -68,6 +68,9 @@ const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the movin
     </footer>
   </nav>
 
+  <!-- the paper grain: still noise over the whole page, text included; only in that grain mode (grain.ts) -->
+  <div class="grain-paper" data-grain-paper aria-hidden="true" hidden></div>
+
   <!-- the cursor: an eye centred on the pointer, blinking now and then (eye-cursor.ts squashes the lid group) -->
   <svg class="eye-cursor" data-eye viewBox="0 0 40 24" width="40" height="24" aria-hidden="true">
     <g class="eye-cursor-lid" data-eye-lid>
@@ -83,6 +86,7 @@ const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the movin
 <script>
   import { mountSisyphus, type SisyphusHandle } from "../scripts/sisyphus";
   import { mountEyeCursor } from "../scripts/eye-cursor";
+  import { mountGrainLab, pageGrain, paintPaper, sceneGrain } from "../scripts/grain";
 
   const root = document.querySelector<HTMLElement>("[data-sisyphus-root]");
   const canvas = root?.querySelector<HTMLCanvasElement>("[data-sisyphus]");
@@ -91,6 +95,7 @@ const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the movin
   const anchor = menu?.querySelector<HTMLElement>("[data-stone-anchor]");
   const stoneTag = root?.querySelector<HTMLElement>("[data-stone-tag]");
   const eye = root?.querySelector<SVGSVGElement>("[data-eye]");
+  const paper = root?.querySelector<HTMLElement>("[data-grain-paper]");
 
   if (eye) mountEyeCursor(eye);
 
@@ -115,9 +120,21 @@ const sss = name.indexOf("sss"); // endle·sss·tudio: the three s get the movin
       if (e.key === "Escape" && open) setMenu(false);
     });
 
-    mountSisyphus(canvas, { stoneAnchor: anchor, stoneTag })
+    // the grain: the site's default, off under reduced motion, or what the URL asks for (then the lab opens)
+    const { grain, fromUrl } = pageGrain();
+    let current = grain;
+    if (paper) paintPaper(paper, grain);
+    if (fromUrl)
+      mountGrainLab(grain, (g) => {
+        current = g;
+        if (paper) paintPaper(paper, g);
+        scene?.setGrain(sceneGrain(g));
+      });
+
+    mountSisyphus(canvas, { stoneAnchor: anchor, stoneTag, grain: sceneGrain(grain) })
       .then((handle) => {
         scene = handle;
+        handle.setGrain(sceneGrain(current));
         if (open) handle.setMenu(true);
       })
       .catch((err) => {

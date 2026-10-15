@@ -590,6 +590,86 @@ body.landing {
   outline: none;
 }
 
+/* the paper grain (grain.ts): still noise over the whole page, text included, under the cursor; the script sets the
+   tile, its size and the opacity */
+.grain-paper {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  image-rendering: pixelated;
+}
+
+/* the grain lab (?grain=… in the URL): a small panel, bottom left, to try the modes; the native pointer is back on it */
+.grain-lab {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 11;
+  display: grid;
+  gap: 0.6rem;
+  width: 16rem;
+  margin: 0;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border: 1px solid rgba(241, 233, 210, 0.2);
+  border-radius: 3px;
+  background: rgba(20, 22, 25, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--landing-cream);
+}
+
+.has-eye-cursor .grain-lab,
+.has-eye-cursor .grain-lab * {
+  cursor: auto !important;
+}
+
+.grain-lab p {
+  margin: 0;
+}
+
+.grain-lab-title {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--landing-pink);
+}
+
+.grain-lab-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+}
+
+.grain-lab-modes label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.grain-lab-range {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr) 3.4rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.grain-lab-range output {
+  text-align: right;
+}
+
+.grain-lab input {
+  margin: 0;
+  accent-color: var(--landing-pink);
+}
+
+.grain-lab-url {
+  color: rgba(241, 233, 210, 0.55);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
 /* the cursor: an eye centred on the pointer (eye-cursor.ts); the native pointer goes only once the eye is live */
 .has-eye-cursor,
 .has-eye-cursor * {

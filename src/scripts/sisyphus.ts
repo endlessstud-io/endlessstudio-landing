@@ -14,6 +14,7 @@
  * terrain under a studio environment, the custom TerrainHeightMarble shader for
  * the stone (flat half-Lambert pink with a pale rim glow), "Photographic" tone
  * mapping and film grain, both applied in a post pass over an HDR render target.
+ * How much grain, how coarse and whether it moves is the page's call (grain.ts).
  *
  * The fall is a small rigid-body simulation of our own: gravity, contact with
  * the height field (restitution + friction), rolling without slipping while on
@@ -100,9 +101,7 @@ const CONFIG = {
   },
   post: {
     exposure: 1.0, // Reinhard ("Photographic") exposure
-    grain: 0.06, // film grain amplitude in display space (0..1)
-    grainSize: 1.5, // grain cell size in device pixels
-    grainHz: 24, // how often the grain pattern changes
+    grainHz: 24, // how often the grain pattern changes, when it moves (amount and size come from opts.grain)
   },
 };
 
@@ -320,9 +319,17 @@ async function loadHeightField() {
   return { hf: new HeightField(data, meta.size, scale), meta: meta as PlateMeta & { maxElevation: number } };
 }
 
+/** The post pass's film grain: amplitude in display space (0 = none), cell size in CSS px, and whether it changes. */
+export interface SceneGrain {
+  amount: number;
+  size: number;
+  moving: boolean;
+}
+
 export interface SisyphusHandle {
   /** Open or close the menu state (relief down, stone at `stoneAnchor`). */
   setMenu(open: boolean): void;
+  setGrain(grain: SceneGrain): void;
   dispose(): void;
 }
 
@@ -331,6 +338,8 @@ export interface SisyphusOptions {
   stoneAnchor?: HTMLElement | null;
   /** HTML element moved to the stone's right every frame, with [data-lat], [data-lon] and [data-alt] children. */
   stoneTag?: HTMLElement | null;
+  /** film grain from the first frame; none if omitted */
+  grain?: SceneGrain;
 }
 
 export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOptions = {}): Promise<SisyphusHandle> {
@@ -409,14 +418,14 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
   };
 
   // --- post pass: the scene renders into an HDR target; a fullscreen quad applies Reinhard tone mapping,
-  // the sRGB transfer and animated film grain (the patch's Noise_v2 op, with motion)
+  // the sRGB transfer and film grain (the patch's Noise_v2 op, still or moving)
   const hdrTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: CONFIG.quality.msaa });
   const postMaterial = new THREE.ShaderMaterial({
     uniforms: {
       tDiffuse: { value: hdrTarget.texture },
       exposure: { value: CONFIG.post.exposure },
-      grain: { value: CONFIG.post.grain },
-      grainSize: { value: CONFIG.post.grainSize * renderer.getPixelRatio() },
+      grain: { value: 0 },
+      grainSize: { value: 1 },
       seed: { value: 0 },
     },
     depthTest: false,
@@ -458,6 +467,14 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
       }
     `,
   });
+  let grainMoves = false;
+  const setGrain = (g: SceneGrain) => {
+    postMaterial.uniforms.grain.value = g.amount;
+    postMaterial.uniforms.grainSize.value = g.size * renderer.getPixelRatio();
+    grainMoves = g.moving;
+    if (!g.moving) postMaterial.uniforms.seed.value = 0;
+  };
+  setGrain(opts.grain ?? { amount: 0, size: 1, moving: false });
   const postScene = new THREE.Scene();
   postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMaterial));
   const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -773,7 +790,7 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
     step(Math.min(elapsed, 0.05)); // the physics gets a capped step for stability
     followStone();
     updateTag();
-    if (!reduceMotion) postMaterial.uniforms.seed.value = Math.floor(now / (1000 / CONFIG.post.grainHz)) % 1024;
+    if (grainMoves) postMaterial.uniforms.seed.value = Math.floor(now / (1000 / CONFIG.post.grainHz)) % 1024;
     renderer.setRenderTarget(hdrTarget);
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
@@ -854,6 +871,7 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
 
   return {
     setMenu,
+    setGrain,
     dispose() {
       stop_();
       window.removeEventListener("resize", resize);

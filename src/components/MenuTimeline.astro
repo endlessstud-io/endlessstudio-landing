@@ -2,9 +2,10 @@
 /**
  * Menu copy, fourth option (2026-10-14): the work as a climb. An elevation profile of Etna along the stone's own path
  * (base → summit, a little past it) is the timeline; milestones sit on it, and the scene's stone, small, rests on the
- * current one (it follows the [data-stone-anchor] box, and rolls when it moves). Wheel, ← → / ↑ ↓, a horizontal swipe
- * or a click on a milestone moves it. Below the line, two columns: the milestone's text, and its project card (linked
- * to the project when it has a link; a video plays while its milestone is current).
+ * current one (it follows the [data-stone-anchor] box, and rolls when it moves). A little Sisyphus pushes it
+ * (sisyphus-man.ts): a stick figure in the line's strokes, feet on the profile, posed on every frame the scene renders.
+ * Wheel, ← → / ↑ ↓, a horizontal swipe or a click on a milestone moves it. Below the line, two columns: the milestone's
+ * text, and its project card (linked to the project when it has a link; a video plays while its milestone is current).
  *
  * The profile is sampled at build time from public/terrain/etna.bin along the climb path of sisyphus.ts: START and
  * WOBBLE copy CONFIG.stone.start and CONFIG.stone.wobble, keep them in sync. The path's first stretch rises over a
@@ -135,9 +136,10 @@ const profile = eased.map((e, i) => [r2(1 + (i / (SAMPLES - 1)) * 98), r2(8 + (1
 const line = "M" + profile.map(([x, y]) => `${x * 10} ${y * 2.2}`).join(" L");
 const area = `${line} L${profile[SAMPLES - 1][0] * 10} 220 L${profile[0][0] * 10} 220 Z`;
 
-// milestones evenly spaced along the climb, the last one on the summit; `at` = fractional index into the profile
+// milestones evenly spaced along the climb, the last one on the summit, the first far enough in that Sisyphus (behind
+// the stone) still stands on the line; `at` = fractional index into the profile
 const at = milestones.map((_, i) => {
-  const s = sMin + (toSummit - sMin) * (0.03 + (0.97 * i) / (milestones.length - 1));
+  const s = sMin + (toSummit - sMin) * (0.07 + (0.93 * i) / (milestones.length - 1));
   return r2(((s - sMin) / (sMax - sMin)) * (SAMPLES - 1));
 });
 const pointAt = (f: number) => {
@@ -178,6 +180,12 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     }
     <!-- the scene's stone sits on this box: bottom centre on the line, as wide as it is -->
     <div class="tl-stone" data-stone-anchor style={`left: ${dots[0][0]}%; top: ${dots[0][1]}%`} aria-hidden="true"></div>
+    <!-- and Sisyphus behind it, in plot px; the far arm and leg first, so the near ones and the head cover them -->
+    <svg class="tl-man" data-man aria-hidden="true">
+      <path class="tl-man-far" data-man-far></path>
+      <path data-man-near></path>
+      <circle class="tl-man-head" data-man-head r="0"></circle>
+    </svg>
   </div>
   <p class="tl-help" aria-hidden="true">
     <span data-counter>01 / {pad(milestones.length - 1)}</span><span>scroll or ← → to climb</span>
@@ -220,6 +228,8 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
 </div>
 
 <script>
+  import { createSisyphus, drawSisyphus } from "../scripts/sisyphus-man";
+
   const root = document.querySelector<HTMLElement>("[data-timeline]");
   const scene = root?.closest<HTMLElement>(".sisyphus");
   const stone = root?.querySelector<HTMLElement>("[data-stone-anchor]");
@@ -237,11 +247,18 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     let pos = at[0]; // the stone's place on the profile, fractional sample index
     let raf = 0;
 
-    const put = (f: number) => {
+    /** [x %, y %] of the plot at fractional profile index f (clamped to the line's ends) */
+    const pointAt = (f: number) => {
+      f = Math.min(Math.max(f, 0), profile.length - 1);
       const i = Math.min(Math.floor(f), profile.length - 2);
       const t = f - i;
-      stone.style.left = `${profile[i][0] + (profile[i + 1][0] - profile[i][0]) * t}%`;
-      stone.style.top = `${profile[i][1] + (profile[i + 1][1] - profile[i][1]) * t}%`;
+      return [profile[i][0] + (profile[i + 1][0] - profile[i][0]) * t, profile[i][1] + (profile[i + 1][1] - profile[i][1]) * t];
+    };
+
+    const put = (f: number) => {
+      const [x, y] = pointAt(f);
+      stone.style.left = `${x}%`;
+      stone.style.top = `${y}%`;
     };
 
     const show = () => {
@@ -275,7 +292,63 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
         }
       }
     };
-    new MutationObserver(playCurrent).observe(scene, { attributes: true, attributeFilter: ["class"] });
+
+    // --- Sisyphus, behind the stone. He is drawn on every frame the scene renders, so he and the stone move together
+    // (the scene runs at 30–40 fps). With no scene (no WebGL, or still loading), he keeps his own clock.
+    const plot = root.querySelector<HTMLElement>(".tl-plot");
+    const man = root.querySelector<SVGSVGElement>("[data-man]");
+    const near = root.querySelector<SVGPathElement>("[data-man-near]");
+    const far = root.querySelector<SVGPathElement>("[data-man-far]");
+    const head = root.querySelector<SVGCircleElement>("[data-man-head]");
+    const sisyphus = createSisyphus();
+    let width = 0; // the plot, px
+    let height = 0;
+    let radius = 0; // the stone, px
+    let drawnAt = performance.now();
+    let sceneAt = -Infinity;
+    let manRaf = 0;
+    const xFirst = profile[0][0];
+    const xLast = profile[profile.length - 1][0];
+    /** screen y of the line at plot x, px */
+    const groundAt = (x: number) =>
+      (pointAt((((100 * x) / width - xFirst) / (xLast - xFirst)) * (profile.length - 1))[1] * height) / 100;
+    const drawMan = () => {
+      const now = performance.now();
+      const dt = still ? 0 : Math.min(0.1, (now - drawnAt) / 1000);
+      drawnAt = now;
+      if (!width || !near || !far || !head) return;
+      const [x, y] = pointAt(pos);
+      const pose = sisyphus.pose((x * width) / 100, (y * height) / 100, radius, groundAt, (xFirst * width) / 100, dt);
+      drawSisyphus({ near, far, head }, pose);
+    };
+    const measure = () => {
+      if (!plot) return;
+      width = plot.clientWidth;
+      height = plot.clientHeight;
+      radius = stone.offsetWidth / 2;
+      man?.style.setProperty("stroke-width", `${Math.max(1.4, radius * 0.12)}px`);
+      sisyphus.reset();
+      drawMan();
+    };
+    if (plot && man) {
+      const resized = new ResizeObserver(measure);
+      resized.observe(plot);
+      resized.observe(stone);
+      scene.querySelector("[data-sisyphus]")?.addEventListener("sisyphus:frame", () => {
+        sceneAt = performance.now();
+        if (isOpen()) drawMan();
+      });
+    }
+    const manLoop = () => {
+      manRaf = requestAnimationFrame(manLoop);
+      if (performance.now() - sceneAt > 250) drawMan();
+    };
+
+    new MutationObserver(() => {
+      playCurrent();
+      cancelAnimationFrame(manRaf);
+      if (isOpen() && man) manRaf = requestAnimationFrame(manLoop);
+    }).observe(scene, { attributes: true, attributeFilter: ["class"] });
 
     /** Roll the stone along the profile to milestone `next`: longer trips take a little longer. */
     const go = (next: number) => {
@@ -466,6 +539,36 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     pointer-events: none;
   }
 
+  /* Sisyphus: strokes like the line's, the far arm and leg dimmer. He shows up once the stone has landed on the line */
+  .tl-man {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    fill: none;
+    stroke: var(--landing-cream);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  :global(.sisyphus.is-menu-open) .tl-man {
+    opacity: 1;
+    transition: opacity 600ms ease 1.3s;
+  }
+
+  .tl-man-far {
+    opacity: 0.55;
+  }
+
+  .tl-man-head {
+    fill: var(--landing-cream);
+    stroke: none;
+  }
+
   /* without WebGL there is no scene stone: a pink dot stands in */
   :global(.sisyphus.is-static) .tl-stone {
     border-radius: 50%;
@@ -586,6 +689,11 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .tl-man,
+    :global(.sisyphus.is-menu-open) .tl-man {
+      transition: none;
+    }
+
     .tl-step,
     .tl-step.is-current,
     .tl-card,

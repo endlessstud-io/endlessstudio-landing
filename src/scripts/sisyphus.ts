@@ -27,7 +27,8 @@
  *
  * The wordmark opens the menu: the plate's relief sinks until the mountain is a flat, faded map and the stone rolls
  * up to the top centre of the screen (an HTML anchor decides exactly where, and how big), where it turns slowly over
- * the menu copy. Closing reverses the move and the climb resumes where it was held.
+ * the menu copy. Closing reverses the move and the climb resumes where it was held. Every rendered frame dispatches
+ * "sisyphus:frame" on the canvas, so HTML drawn against the stone (the timeline's Sisyphus) moves in step with it.
  *
  * A small HTML tag follows the stone with its live latitude, longitude and the ground altitude under it (plate uv →
  * lon/lat via georef.ts), hidden whenever the stone is out of sight: off screen, not yet grown, or behind the mountain
@@ -761,6 +762,7 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
   let last = performance.now();
   let raf = 0;
   let running = false;
+  const rendered = new Event("sisyphus:frame");
   const frame = (now: number) => {
     raf = requestAnimationFrame(frame);
     // frame cap: skip vsync ticks until at least a cap interval has passed (4 ms slack absorbs timer jitter)
@@ -776,6 +778,7 @@ export async function mountSisyphus(canvas: HTMLCanvasElement, opts: SisyphusOpt
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
     renderer.render(postScene, postCamera);
+    canvas.dispatchEvent(rendered);
   };
   const start_ = () => {
     if (running) return;

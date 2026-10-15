@@ -326,9 +326,9 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
 
     const isOpen = () => scene.classList.contains("is-menu-open");
 
-    // a video the visitor paused stays paused, here and on later visits to its milestone, until they play it again;
-    // under reduced motion it starts paused
-    let held = still;
+    // a video the visitor paused stays paused, here and on later visits to its milestone, until they play it again
+    // (each video on its own); under reduced motion they all start paused
+    const held = new Set(still ? cards : []);
 
     /** Only the current card's video plays, only while the menu is open, and not while held. */
     const playCurrent = () => {
@@ -336,21 +336,21 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
         const video = c.querySelector("video");
         if (!video) continue;
         const up = Number(c.dataset.stepCard) === current && isOpen();
-        if (up && !held) video.play().catch(() => {});
+        if (up && !held.has(c)) video.play().catch(() => {});
         else video.pause();
         if (!up) video.currentTime = 0;
         const button = c.querySelector<HTMLButtonElement>("[data-play]");
-        button?.classList.toggle("is-held", held);
-        button?.setAttribute("aria-label", held ? "Play the video" : "Pause the video");
+        button?.classList.toggle("is-held", held.has(c));
+        button?.setAttribute("aria-label", held.has(c) ? "Play the video" : "Pause the video");
       }
     };
 
     // the button, or the video itself when its picture isn't a link, pauses and plays it
-    const hold = () => {
-      held = !held;
-      playCurrent();
-    };
     for (const c of cards) {
+      const hold = () => {
+        if (!held.delete(c)) held.add(c);
+        playCurrent();
+      };
       c.querySelector("[data-play]")?.addEventListener("click", hold);
       const shot = c.querySelector("video")?.closest<HTMLElement>("[data-shot]");
       if (shot && shot.tagName !== "A") {

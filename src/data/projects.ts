@@ -6,7 +6,8 @@
  * project media); Marxan has no large one there, so it keeps the stand-in from marxanplanning.org. archaeo.studio is the
  * user's screen recording (a 21 s scroll through its landing, cropped and re-encoded to 1280×640 webm + mp4, poster =
  * its first frame), played only while its card is open; the site sits behind a login, so that word has no link (a hint
- * without `href` still opens its card).
+ * without `href` still opens its card). Global Fishing Watch plays the user's recording of the map too (its first 19 s,
+ * 832×416, poster = first frame); gfw-fishing.webp is the older still.
  */
 export interface Hint {
   word: string;
@@ -76,7 +77,8 @@ export const hint = {
     work: "Worked on the map's move from MapLibre to deck.gl, with custom GPU shaders and binary data, for exploring single vessels and patterns across thousands of them.",
     stack: ["deck.gl", "WebGL shaders", "React", "Next.js", "Nx", "Terraform", "Google Cloud"],
     href: "https://globalfishingwatch.org/map",
-    image: "/projects/gfw-fishing.webp",
+    image: "/projects/gfw-fishing-poster.webp",
+    video: { webm: "/projects/gfw-fishing.webm", mp4: "/projects/gfw-fishing.mp4" },
   },
   // the timeline shows one card per milestone: the maps and the pipeline together
   treeEquity: {

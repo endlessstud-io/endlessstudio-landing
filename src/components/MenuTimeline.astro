@@ -22,7 +22,10 @@ interface Milestone {
   /** mono line over the text */
   when: string;
   text: string;
-  card?: Hint;
+  /** the projects' pictures, shown in turn when there are several; their stacks go under the text */
+  cards?: Hint[];
+  /** the stone waits here when the menu opens */
+  start?: true;
 }
 
 const milestones: Milestone[] = [
@@ -38,43 +41,32 @@ const milestones: Milestone[] = [
   },
   {
     label: "2018",
-    when: "2018 · Vizzuality · Climate Watch",
-    text: "He joined Vizzuality to work on Climate Watch, the open platform that tracks whether countries are keeping their climate commitments, building the shared charts and dashboards behind it and its India and Indonesia explorers.",
-    card: hint.climate,
+    when: "2018–2022 · Vizzuality · Climate Watch, Trase, Marxan Cloud",
+    text: "At Vizzuality he built the shared charts and dashboards of Climate Watch, which tracks whether countries keep their climate commitments; the flows on Trase that follow Brazilian soy from the municipalities where it grows to the companies and countries that buy it; and the foundations of Marxan Cloud, which helps planners draw protected areas at the lowest cost.",
+    cards: [hint.climate, hint.soy, hint.marxan],
   },
   {
     when: "2018–2022 · Vizzuality · Half-Earth Project Map",
     text: "As technical lead of the Half-Earth Project Map he rebuilt it from Cesium on ArcGIS and led four developers, to show where thousands of species live and which places would protect the most of them.",
-    card: hint.species,
-  },
-  {
-    label: "2019",
-    when: "2019 · Vizzuality · Trase",
-    text: "On Trase he worked on the flows that follow Brazilian soy from the municipalities where it grows to the companies and countries that buy it, and the deforestation risk it carries.",
-    card: hint.soy,
-  },
-  {
-    label: "2021",
-    when: "2021 · Vizzuality · Marxan Cloud",
-    text: "For Marxan Cloud he laid the foundations (project setup, automation, the component library) of an app that helps planners draw protected areas that meet their targets at the lowest cost.",
-    card: hint.marxan,
+    cards: [hint.species],
   },
   {
     label: "2022",
-    when: "2022 · endlessstudio · Tree Equity Score",
-    text: "In 2022 he went independent as endlessstudio. For American Forests he builds the map of which city blocks live without shade, so city halls and neighborhood groups can argue for planting where it matters, and owns the Python pipeline that turns raw shapefiles into its tiles.",
-    card: hint.treeEquity,
+    when: "2022–2025 · endlessstudio · Global Fishing Watch",
+    text: "In 2022 he went independent as endlessstudio. For Global Fishing Watch he helped move the ocean map onto the GPU, with custom shaders and binary data, so anyone can follow a single vessel or years of fishing across the sea.",
+    cards: [hint.vessel],
+    start: true,
   },
   {
-    when: "2022–2025 · endlessstudio · Global Fishing Watch",
-    text: "For Global Fishing Watch he helped move the ocean map onto the GPU, with custom shaders and binary data, so anyone can follow a single vessel or years of fishing across the sea.",
-    card: hint.vessel,
+    when: "2022–2026 · endlessstudio · Tree Equity Score",
+    text: "For American Forests he builds the map of which city blocks live without shade, so city halls and neighborhood groups can argue for planting where it matters, and owns the Python pipeline that turns raw shapefiles into its tiles.",
+    cards: [hint.treeEquity],
   },
   {
     label: "now",
     when: "Now · endlessstudio · archaeo.studio",
     text: "Now he is building archaeo.studio, a workspace that keeps an excavation's records, maps and research together, with an AI-assisted way of working grounded in domain models and explicit architecture.",
-    card: hint.archaeo,
+    cards: [hint.archaeo],
   },
   {
     label: "next",
@@ -149,10 +141,20 @@ const pointAt = (f: number) => {
 };
 const dots = at.map(pointAt);
 const pad = (i: number) => String(i + 1).padStart(2, "0");
+const first = Math.max(0, milestones.findIndex((m) => m.start)); // where the stone waits when the menu opens
+/** a milestone's stack: its projects' chips, each once */
+const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.stack))];
 ---
 
 <!-- the line and its milestones; clicks in here never close the menu -->
-<div class="timeline" data-timeline data-keep-menu data-profile={JSON.stringify(profile)} data-at={JSON.stringify(at)}>
+<div
+  class="timeline"
+  data-timeline
+  data-keep-menu
+  data-profile={JSON.stringify(profile)}
+  data-at={JSON.stringify(at)}
+  data-first={first}
+>
   <div class="tl-plot">
     <svg class="tl-profile" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true">
       <defs>
@@ -167,19 +169,19 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     {
       milestones.map((m, i) => (
         <button
-          class:list={["tl-dot", { "is-current": i === 0 }]}
+          class:list={["tl-dot", { "is-current": i === first, "is-passed": i < first }]}
           type="button"
           style={`left: ${dots[i][0]}%; top: ${dots[i][1]}%`}
           data-dot={i}
           aria-label={m.when}
-          aria-current={i === 0 ? "step" : undefined}
+          aria-current={i === first ? "step" : undefined}
         >
           {m.label && <span>{m.label}</span>}
         </button>
       ))
     }
     <!-- the scene's stone sits on this box: bottom centre on the line, as wide as it is -->
-    <div class="tl-stone" data-stone-anchor style={`left: ${dots[0][0]}%; top: ${dots[0][1]}%`} aria-hidden="true"></div>
+    <div class="tl-stone" data-stone-anchor style={`left: ${dots[first][0]}%; top: ${dots[first][1]}%`} aria-hidden="true"></div>
     <!-- and Sisyphus behind it, in plot px; the far arm and leg first, so the near ones and the head cover them -->
     <svg class="tl-man" data-man aria-hidden="true">
       <path class="tl-man-far" data-man-far></path>
@@ -188,22 +190,26 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     </svg>
   </div>
   <p class="tl-help" aria-hidden="true">
-    <span data-counter>01 / {pad(milestones.length - 1)}</span><span>scroll or ← → to climb</span>
+    <span data-counter>{pad(first)} / {pad(milestones.length - 1)}</span><span>scroll or ← → to climb</span>
   </p>
 </div>
 
-<!-- menu-lead: shares the lead's reveal transition when the menu opens. Text and stack left, the milestone's picture
-     right; each column stacks all milestones in one grid cell, so the layout never jumps -->
+<!-- menu-lead: shares the lead's reveal transition when the menu opens. Text and stack left, the milestone's pictures
+     right (several take turns); each column stacks all milestones in one grid cell, so the layout never jumps -->
 <div class="menu-lead tl-content">
   <div class="tl-steps" aria-live="polite">
     {
       milestones.map((m, i) => (
-        <article class:list={["tl-step", { "is-current": i === 0 }]} data-step-text={i} aria-hidden={i === 0 ? undefined : "true"}>
+        <article
+          class:list={["tl-step", { "is-current": i === first, "is-solo": !m.cards }]}
+          data-step-text={i}
+          aria-hidden={i === first ? undefined : "true"}
+        >
           <p class="tl-when">{m.when}</p>
           <p class="tl-text">{m.text}</p>
-          {m.card && (
+          {m.cards && (
             <ul class="tl-stack" aria-label="Stack">
-              {m.card.stack.map((t) => (
+              {stackOf(m).map((t) => (
                 <li>{t}</li>
               ))}
             </ul>
@@ -214,22 +220,28 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
   </div>
   <div class="tl-cards">
     {
-      milestones.map((m, i) => {
-        if (!m.card) return null;
-        const Tag = m.card.href ? "a" : "div";
-        return (
-          <Tag
-            class:list={["tl-card", { "is-current": i === 0 }]}
-            data-step-card={i}
-            href={m.card.href}
-            target={m.card.href && "_blank"}
-            rel={m.card.href && "noopener"}
-            aria-label={m.card.href ? `${m.card.project} (opens in a new tab)` : undefined}
-          >
-            <ProjectCard project={m.card} />
-          </Tag>
-        );
-      })
+      milestones.map(
+        (m, i) =>
+          m.cards && (
+            <div class:list={["tl-card", { "is-current": i === first }]} data-step-card={i}>
+              {m.cards.map((card, k) => {
+                const Tag = card.href ? "a" : "div";
+                return (
+                  <Tag
+                    class:list={["tl-shot", { "is-shown": k === 0 }]}
+                    data-shot
+                    href={card.href}
+                    target={card.href && "_blank"}
+                    rel={card.href && "noopener"}
+                    aria-label={card.href ? `${card.project} (opens in a new tab)` : undefined}
+                  >
+                    <ProjectCard project={card} />
+                  </Tag>
+                );
+              })}
+            </div>
+          ),
+      )
     }
   </div>
 </div>
@@ -250,8 +262,8 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const last = at.length - 1;
     const pad = (i: number) => String(i + 1).padStart(2, "0");
-    let current = 0;
-    let pos = at[0]; // the stone's place on the profile, fractional sample index
+    let current = Number(root.dataset.first ?? 0);
+    let pos = at[current]; // the stone's place on the profile, fractional sample index
     let raf = 0;
 
     /** [x %, y %] of the plot at fractional profile index f (clamped to the line's ends) */
@@ -356,6 +368,15 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
       cancelAnimationFrame(manRaf);
       if (isOpen() && man) manRaf = requestAnimationFrame(manLoop);
     }).observe(scene, { attributes: true, attributeFilter: ["class"] });
+
+    // a milestone with several projects shows their pictures in turn while it is up (never under reduced motion)
+    window.setInterval(() => {
+      if (!isOpen() || still || document.hidden) return;
+      const shots = [...(cards.find((c) => Number(c.dataset.stepCard) === current)?.querySelectorAll("[data-shot]") ?? [])];
+      if (shots.length < 2) return;
+      const shown = shots.findIndex((s) => s.classList.contains("is-shown"));
+      shots.forEach((s, k) => s.classList.toggle("is-shown", k === (shown + 1) % shots.length));
+    }, 3500);
 
     /** Roll the stone along the profile to milestone `next`: longer trips take a little longer. */
     const go = (next: number) => {
@@ -605,9 +626,17 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     text-align: left;
   }
 
-  .tl-steps,
+  /* the text column spans both columns as a subgrid, so a milestone without pictures can take the whole width,
+     centred, while the others keep to the left one; every text keeps its own place, so the crossfade never jumps */
+  .tl-steps {
+    display: grid;
+    grid-area: 1 / 1 / 2 / -1;
+    grid-template-columns: subgrid;
+  }
+
   .tl-cards {
     display: grid;
+    grid-area: 1 / 2;
   }
 
   .tl-step,
@@ -632,10 +661,36 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
       transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 120ms;
   }
 
-  .tl-card {
+  .tl-step.is-solo {
+    grid-column: 1 / -1;
+    justify-self: center;
     align-self: center;
+    max-width: 40rem;
+    text-align: center;
+  }
+
+  .tl-card {
+    display: grid;
+    align-self: center;
+  }
+
+  /* one picture per project; when there are several they crossfade. A shown one inherits the card's visibility, so
+     the links of a card that isn't up stay out of reach */
+  .tl-shot {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
     color: inherit;
     text-decoration: none;
+    transition:
+      opacity 900ms ease,
+      visibility 0s linear 900ms;
+  }
+
+  .tl-shot.is-shown {
+    visibility: inherit;
+    opacity: 1;
+    transition: opacity 900ms ease;
   }
 
   /* the left column says the rest: the card is only its picture or video */
@@ -647,12 +702,12 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     transition: border-color 240ms ease;
   }
 
-  a.tl-card:hover :global(.bio-card),
-  a.tl-card:focus-visible :global(.bio-card) {
+  a.tl-shot:hover :global(.bio-card),
+  a.tl-shot:focus-visible :global(.bio-card) {
     border-color: rgba(241, 233, 210, 0.45);
   }
 
-  a.tl-card:focus-visible {
+  a.tl-shot:focus-visible {
     outline: none;
   }
 
@@ -698,7 +753,6 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
   /* the line sits higher than the old emblem: its left end is low, clear of the wordmark */
   :global(.menu:has(.timeline)) {
     padding-top: clamp(3.5rem, 9vh, 6rem);
-    padding-bottom: 3rem;
   }
 
   /* narrow screens: the card goes under the text */
@@ -706,6 +760,14 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     .tl-content {
       grid-template-columns: minmax(0, 1fr);
       gap: 1.5rem;
+    }
+
+    .tl-steps {
+      grid-area: 1 / 1;
+    }
+
+    .tl-cards {
+      grid-area: 2 / 1;
     }
   }
 

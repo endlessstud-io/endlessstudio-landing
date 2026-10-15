@@ -483,8 +483,8 @@ body.landing {
   align-content: start;
   justify-items: center;
   gap: clamp(1.1rem, 3vh, 2rem);
-  /* the bottom padding keeps the copy clear of the credit; short screens scroll instead of overlapping */
-  padding: clamp(5rem, 13vh, 7.5rem) clamp(1.25rem, 5vw, 4rem) 4rem;
+  /* the bottom padding keeps the copy clear of the address and credit; short screens scroll instead of overlapping */
+  padding: clamp(5rem, 13vh, 7.5rem) clamp(1.25rem, 5vw, 4rem) 6.5rem;
   overflow: hidden auto; /* x hidden: the hover previews can hang past the sides on narrow screens */
   overscroll-behavior: contain;
   visibility: hidden;
@@ -518,19 +518,30 @@ body.landing {
   color: var(--landing-cream);
 }
 
+/* bottom centre: the address, and the terrain credit right under it */
+.menu-foot {
+  position: absolute;
+  right: 0;
+  bottom: clamp(1rem, 3vh, 1.8rem);
+  left: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+}
+
 .menu-contact {
   margin: 0;
   font-family: var(--landing-font);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: opacity 300ms ease;
 }
 
 .menu-contact a {
   display: inline-block;
-  padding: 0.45rem 0;
   border-bottom: 1px solid transparent;
-  color: rgba(241, 233, 210, 0.7);
+  color: rgba(241, 233, 210, 0.9);
   text-decoration: none;
   transition: color 240ms ease, border-color 240ms ease;
 }
@@ -542,31 +553,21 @@ body.landing {
   outline: none;
 }
 
-.menu-lead,
-.menu-contact {
+.menu-lead {
   transform: translateY(0.7rem);
   transition:
     transform 360ms ease,
     opacity 300ms ease;
 }
 
-.sisyphus.is-menu-open .menu-lead,
-.sisyphus.is-menu-open .menu-contact {
+.sisyphus.is-menu-open .menu-lead {
   transform: none;
   transition:
     transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 650ms,
     opacity 300ms ease;
 }
 
-.sisyphus.is-menu-open .menu-contact {
-  transition-delay: 800ms, 0ms;
-}
-
 .menu-credit {
-  position: absolute;
-  right: 0;
-  bottom: clamp(1rem, 3vh, 1.8rem);
-  left: 0;
   margin: 0;
   text-align: center;
   font-family: var(--landing-font);
@@ -650,10 +651,8 @@ body.landing {
 
   .menu,
   .menu-lead,
-  .menu-contact,
   .sisyphus.is-menu-open .menu,
-  .sisyphus.is-menu-open .menu-lead,
-  .sisyphus.is-menu-open .menu-contact {
+  .sisyphus.is-menu-open .menu-lead {
     transition-duration: 0s;
     transition-delay: 0s;
   }

@@ -258,6 +258,14 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
                   </Tag>
                 );
               })}
+              {m.cards.some((card) => card.video) && (
+                <button class="tl-play" type="button" data-play data-keep-menu aria-label="Pause the video">
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path class="tl-play-pause" d="M4 3h2.6v10H4zM9.4 3H12v10H9.4z"></path>
+                    <path class="tl-play-play" d="M5 3.2 13 8l-8 4.8z"></path>
+                  </svg>
+                </button>
+              )}
             </div>
           ),
       )
@@ -318,18 +326,38 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
 
     const isOpen = () => scene.classList.contains("is-menu-open");
 
-    /** Only the current card's video plays, and only while the menu is open. */
+    // a video the visitor paused stays paused, here and on later visits to its milestone, until they play it again;
+    // under reduced motion it starts paused
+    let held = still;
+
+    /** Only the current card's video plays, only while the menu is open, and not while held. */
     const playCurrent = () => {
       for (const c of cards) {
         const video = c.querySelector("video");
         if (!video) continue;
-        if (Number(c.dataset.stepCard) === current && isOpen() && !still) video.play().catch(() => {});
-        else {
-          video.pause();
-          video.currentTime = 0;
-        }
+        const up = Number(c.dataset.stepCard) === current && isOpen();
+        if (up && !held) video.play().catch(() => {});
+        else video.pause();
+        if (!up) video.currentTime = 0;
+        const button = c.querySelector<HTMLButtonElement>("[data-play]");
+        button?.classList.toggle("is-held", held);
+        button?.setAttribute("aria-label", held ? "Play the video" : "Pause the video");
       }
     };
+
+    // the button, or the video itself when its picture isn't a link, pauses and plays it
+    const hold = () => {
+      held = !held;
+      playCurrent();
+    };
+    for (const c of cards) {
+      c.querySelector("[data-play]")?.addEventListener("click", hold);
+      const shot = c.querySelector("video")?.closest<HTMLElement>("[data-shot]");
+      if (shot && shot.tagName !== "A") {
+        shot.dataset.keepMenu = "";
+        shot.addEventListener("click", hold);
+      }
+    }
 
     // --- Sisyphus, behind the stone. He is drawn on every frame the scene renders, so he and the stone move together
     // (the scene runs at 30–40 fps). With no scene (no WebGL, or still loading), he keeps his own clock.
@@ -693,6 +721,54 @@ const stackOf = (m: Milestone) => [...new Set((m.cards ?? []).flatMap((c) => c.s
   .tl-card {
     display: grid;
     align-self: center;
+  }
+
+  /* pause / play, over the bottom right corner of a card with a video */
+  .tl-play {
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: end;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    margin: 0.75rem;
+    padding: 0;
+    border: 1px solid rgba(241, 233, 210, 0.3);
+    border-radius: 50%;
+    background: rgba(20, 22, 25, 0.72);
+    color: var(--landing-cream);
+    opacity: 0.75;
+    transition:
+      opacity 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .tl-card:hover .tl-play,
+  .tl-play:focus-visible {
+    border-color: rgba(241, 233, 210, 0.6);
+    opacity: 1;
+  }
+
+  .tl-play:focus-visible {
+    outline: 1px solid var(--landing-mist);
+    outline-offset: 2px;
+  }
+
+  .tl-play svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: currentColor;
+  }
+
+  .tl-play-play,
+  .tl-play.is-held .tl-play-pause {
+    display: none;
+  }
+
+  .tl-play.is-held .tl-play-play {
+    display: inline;
   }
 
   /* one picture per project; when there are several they crossfade. A shown one inherits the card's visibility, so

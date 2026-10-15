@@ -98,4 +98,4 @@ const { project: h } = Astro.props;
 
 </style>
 
-<span class="bio-card">{h.video ? <video poster={h.image} width="1088" height="544" muted loop playsinline preload="none"><source src={h.video.webm} type="video/webm" /><source src={h.video.mp4} type="video/mp4" /></video> : <img src={h.image} alt="" width="800" height="400" loading="lazy" decoding="async" />}<span class="bio-tag"><span class="bio-name">{h.project}</span><span class="bio-meta">{h.meta}</span><span class="bio-work">{h.work}</span><span class="bio-stack">{h.stack.map((t) => <span>{t}</span>)}</span></span></span>
+<span class="bio-card">{h.video ? <video poster={h.image} width="1280" height="640" muted loop playsinline preload="none"><source src={h.video.webm} type="video/webm" /><source src={h.video.mp4} type="video/mp4" /></video> : <img src={h.image} alt="" width="800" height="400" loading="lazy" decoding="async" />}<span class="bio-tag"><span class="bio-name">{h.project}</span><span class="bio-meta">{h.meta}</span><span class="bio-work">{h.work}</span><span class="bio-stack">{h.stack.map((t) => <span>{t}</span>)}</span></span></span>

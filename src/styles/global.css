@@ -518,22 +518,15 @@ body.landing {
   color: var(--landing-cream);
 }
 
-.menu-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.4rem clamp(1.2rem, 3vw, 2.6rem);
+.menu-contact {
   margin: 0;
-  padding: 0;
-  list-style: none;
   font-family: var(--landing-font);
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.menu-list a {
+.menu-contact a {
   display: inline-block;
   padding: 0.45rem 0;
   border-bottom: 1px solid transparent;
@@ -542,15 +535,15 @@ body.landing {
   transition: color 240ms ease, border-color 240ms ease;
 }
 
-.menu-list a:hover,
-.menu-list a:focus-visible {
+.menu-contact a:hover,
+.menu-contact a:focus-visible {
   color: var(--landing-cream);
   border-bottom-color: currentColor;
   outline: none;
 }
 
 .menu-lead,
-.menu-list {
+.menu-contact {
   transform: translateY(0.7rem);
   transition:
     transform 360ms ease,
@@ -558,14 +551,14 @@ body.landing {
 }
 
 .sisyphus.is-menu-open .menu-lead,
-.sisyphus.is-menu-open .menu-list {
+.sisyphus.is-menu-open .menu-contact {
   transform: none;
   transition:
     transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 650ms,
     opacity 300ms ease;
 }
 
-.sisyphus.is-menu-open .menu-list {
+.sisyphus.is-menu-open .menu-contact {
   transition-delay: 800ms, 0ms;
 }
 
@@ -657,10 +650,10 @@ body.landing {
 
   .menu,
   .menu-lead,
-  .menu-list,
+  .menu-contact,
   .sisyphus.is-menu-open .menu,
   .sisyphus.is-menu-open .menu-lead,
-  .sisyphus.is-menu-open .menu-list {
+  .sisyphus.is-menu-open .menu-contact {
     transition-duration: 0s;
     transition-delay: 0s;
   }

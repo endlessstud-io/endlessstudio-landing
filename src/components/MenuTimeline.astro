@@ -192,8 +192,8 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
   </p>
 </div>
 
-<!-- menu-lead: shares the lead's reveal transition when the menu opens. Text left, the milestone's card right; each
-     column stacks all milestones in one grid cell, so the layout never jumps -->
+<!-- menu-lead: shares the lead's reveal transition when the menu opens. Text and stack left, the milestone's picture
+     right; each column stacks all milestones in one grid cell, so the layout never jumps -->
 <div class="menu-lead tl-content">
   <div class="tl-steps" aria-live="polite">
     {
@@ -201,6 +201,13 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
         <article class:list={["tl-step", { "is-current": i === 0 }]} data-step-text={i} aria-hidden={i === 0 ? undefined : "true"}>
           <p class="tl-when">{m.when}</p>
           <p class="tl-text">{m.text}</p>
+          {m.card && (
+            <ul class="tl-stack" aria-label="Stack">
+              {m.card.stack.map((t) => (
+                <li>{t}</li>
+              ))}
+            </ul>
+          )}
         </article>
       ))
     }
@@ -587,13 +594,13 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     color: rgba(241, 233, 210, 0.45);
   }
 
-  /* below the line: text left, the milestone's card right */
+  /* below the line: text left, the milestone's card right, as wide as the line allows */
   .tl-content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
-    gap: clamp(2rem, 5vw, 4.5rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, clamp(28rem, 46vw, 44rem));
+    gap: clamp(2rem, 4vw, 3.5rem);
     align-items: center;
-    width: min(64rem, 90vw);
+    width: min(72rem, 90vw);
     max-width: none; /* .menu-lead caps it at 34rem */
     text-align: left;
   }
@@ -631,8 +638,8 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     text-decoration: none;
   }
 
-  /* the left column already names the project and the years */
-  .tl-card :global(:is(.bio-name, .bio-meta)) {
+  /* the left column says the rest: the card is only its picture or video */
+  .tl-card :global(.bio-tag) {
     display: none;
   }
 
@@ -665,6 +672,27 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
     line-height: 1.5;
     text-wrap: pretty;
     color: rgba(241, 233, 210, 0.86);
+  }
+
+  /* the milestone's stack under its text, as chips like the cards' */
+  .tl-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 1.1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tl-stack li {
+    padding: 0.28rem 0.55rem;
+    border: 1px solid rgba(241, 233, 210, 0.22);
+    border-radius: 2px;
+    color: var(--landing-cream);
   }
 
   /* the line sits higher than the old emblem: its left end is low, clear of the wordmark */

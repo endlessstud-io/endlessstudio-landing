@@ -4,8 +4,9 @@
  *
  * Images are 2:1 crops of the screens in endlessstudio/conversaciones/kpler-cv/assets/work (the LinkedIn profile's
  * project media); Marxan has no large one there, so it keeps the stand-in from marxanplanning.org. archaeo.studio is the
- * user's screen recording (5 s, re-encoded to 1088×544 webm + mp4, poster = its first frame), played only while its card
- * is open; the site sits behind a login, so that word has no link (a hint without `href` still opens its card).
+ * user's screen recording (a 21 s scroll through its landing, cropped and re-encoded to 1280×640 webm + mp4, poster =
+ * its first frame), played only while its card is open; the site sits behind a login, so that word has no link (a hint
+ * without `href` still opens its card).
  */
 export interface Hint {
   word: string;

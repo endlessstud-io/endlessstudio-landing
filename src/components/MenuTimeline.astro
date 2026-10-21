@@ -32,30 +32,35 @@ interface Milestone {
 
 const milestones: Milestone[] = [
   {
+    label: "before",
+    when: "Before · History",
+    text: "I studied History, and the social sciences still shape how I look at data. A census, a parish register or a ship's log is always someone's record of real people and places, made for a reason and full of gaps. I try to read every dataset that way, and to show it to people honestly, including what it can't tell them.",
+  },
+  {
     label: "2014",
     when: "2014 · Freelance",
-    text: "Javi Abia has spent more than a decade turning data that is hard to read into maps people can act on. It began in 2014: front ends and interface design as a freelancer, and seven months of full-stack work at Credia.",
+    text: "In 2014 I started building front ends and designing interfaces as a freelancer, with seven months of full-stack work at Credia in between. I was learning the trade by doing it, one website at a time, and getting hooked on the craft.",
   },
   {
     label: "2016",
     when: "2016 · Novelti",
-    text: "At Novelti, in Madrid, he learned to make live data legible: near-real-time dashboards where people could see patterns and anomalies in the streams from connected devices.",
+    text: "At Novelti, in Madrid, I built near-real-time dashboards for data streaming in from connected devices. That's where I learned how much speed matters. When the screen keeps pace with the data, people start spotting patterns, and the odd reading that doesn't fit, without anyone pointing them out.",
   },
   {
     label: "2018",
     when: "2018–2022 · Vizzuality · Climate Watch, Trase, Marxan Cloud",
-    text: "At Vizzuality he built the shared charts and dashboards of Climate Watch, which tracks whether countries keep their climate commitments; the flows on Trase that follow Brazilian soy from the municipalities where it grows to the companies and countries that buy it; and the foundations of Marxan Cloud, which helps planners draw protected areas at the lowest cost.",
+    text: "At Vizzuality I spent four years on questions much bigger than me. I built the charts and dashboards of Climate Watch, which tracks whether countries keep their climate commitments, the flows on Trase that follow Brazilian soy to the companies that buy it, and the groundwork of Marxan Cloud, for planning protected areas. I learned there that good data is only half the job. How you pick it and lay it out is often what moves people to act.",
     cards: [hint.climate, hint.soy, hint.marxan],
   },
   {
     when: "2018–2022 · Vizzuality · Half-Earth Project Map",
-    text: "As technical lead of the Half-Earth Project Map he rebuilt it from Cesium on ArcGIS and led four developers, to show where thousands of species live and which places would protect the most of them.",
+    text: "As technical lead I rebuilt the Half-Earth Project Map on ArcGIS, moving it off Cesium with a team of four developers and working closely with the scientists and designers. It shows where thousands of species live and which places would protect the most of them. We put a lot of effort into speed, because when a globe answers right away, people keep asking it things.",
     cards: [hint.species],
   },
   {
     label: "2022",
     when: "2022–2025 · endlessstudio · Global Fishing Watch",
-    text: "In 2022 he went independent as endlessstudio. For Global Fishing Watch he helped move the ocean map onto the GPU, with custom shaders and binary data, so anyone can follow a single vessel or years of fishing across the sea.",
+    text: "In 2022 I went independent as endlessstudio. For Global Fishing Watch I helped move the ocean map onto the GPU, writing custom shaders and working with binary data. All so that anyone can follow a single vessel, or pull back to years of fishing across the whole sea, without waiting for the map.",
     cards: [hint.vessel],
     talk: {
       title: "Migrating visualizations from MapLibre to deck.gl",
@@ -66,19 +71,19 @@ const milestones: Milestone[] = [
   },
   {
     when: "2022–2026 · endlessstudio · Tree Equity Score",
-    text: "For American Forests he builds the map of which city blocks live without shade, so city halls and neighborhood groups can argue for planting where it matters, and owns the Python pipeline that turns raw shapefiles into its tiles.",
+    text: "For American Forests I build Tree Equity Score, which maps the city blocks that live without shade, and I own the Python pipeline behind it, checked feature by feature from the source files to the tiles. It's data about heat, income and race, so it has to be exact, and it has to be told with care. City halls and neighborhood groups use it to argue for trees where people need them most.",
     cards: [hint.treeEquity],
   },
   {
     label: "now",
     when: "Now · endlessstudio · archaeo.studio",
-    text: "Now he is building archaeo.studio, a workspace that keeps an excavation's records, maps and research together, with an AI-assisted way of working grounded in domain models and explicit architecture.",
+    text: "Now I'm building archaeo.studio, a place where an excavation's records, maps and research live together. In a way it brings me back to History. I'm building it with AI as part of the process, but slowly and deliberately: first a model of the domain, then an explicit architecture, then the code, then checking that it all holds.",
     cards: [hint.archaeo],
   },
   {
     label: "next",
     when: "Next",
-    text: "The tools keep changing; the purpose doesn't: fast, open, honest interfaces that put scientific data in the hands of the people deciding about forests, coasts and cities. Data about the commons should work for the common good.",
+    text: "Next, I want to find out how far language models can take exploration. With them I can wander through datasets far too big to read on my own, ask questions in plain words and chase a hunch in an afternoon. I'd love to turn what I find there into tools that mean something to people, with new and more expressive ways of showing what the data holds, all the craft and art I can put into them, and always faithful to the sources. I don't know yet what they'll look like, and honestly that's the exciting part.",
   },
 ];
 

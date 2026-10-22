@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import ProjectCard from "./ProjectCard.astro";
 import { hint, type Hint } from "../data/projects";
+import { readLandingCv } from "../lib/landing-cv";
 
 interface Milestone {
   /** short label under the dot; omitted when the year repeats */
@@ -29,6 +30,20 @@ interface Milestone {
   /** the stone waits here when the menu opens */
   start?: true;
 }
+
+const cv = await readLandingCv();
+const project = (key: string) => cv.projects.find((entry) => entry.key === key);
+const cardFor = (key: string, media: Hint): Hint => {
+  const entry = project(key);
+  if (!entry) return media;
+  return {
+    ...media,
+    project: entry.title,
+    meta: [entry.organization, entry.dates, entry.role].filter(Boolean).join(" · "),
+    work: entry.paragraphs.join(" "),
+    stack: entry.stack,
+  };
+};
 
 const milestones: Milestone[] = [
   {
@@ -50,35 +65,31 @@ const milestones: Milestone[] = [
     label: "2018",
     when: "2018–2022 · Vizzuality · Climate Watch, Trase, Marxan Cloud",
     text: "At Vizzuality I spent four years on questions much bigger than me. I built the charts and dashboards of Climate Watch, which tracks whether countries keep their climate commitments, the flows on Trase that follow Brazilian soy to the companies that buy it, and the groundwork of Marxan Cloud, for planning protected areas. I learned there that good data is only half the job. How you pick it and lay it out is often what moves people to act.",
-    cards: [hint.climate, hint.soy, hint.marxan],
+    cards: [cardFor('Climate Watch', hint.climate), cardFor('Trase', hint.soy), hint.marxan],
   },
   {
     when: "2018–2022 · Vizzuality · Half-Earth Project Map",
     text: "As technical lead I rebuilt the Half-Earth Project Map on ArcGIS, moving it off Cesium with a team of four developers and working closely with the scientists and designers. It shows where thousands of species live and which places would protect the most of them. We put a lot of effort into speed, because when a globe answers right away, people keep asking it things.",
-    cards: [hint.species],
+    cards: [cardFor('Half-Earth', hint.species)],
   },
   {
     label: "2022",
     when: "2022–2025 · endlessstudio · Global Fishing Watch",
     text: "In 2022 I went independent as endlessstudio. For Global Fishing Watch I helped move the ocean map onto the GPU, writing custom shaders and working with binary data. All so that anyone can follow a single vessel, or pull back to years of fishing across the whole sea, without waiting for the map.",
-    cards: [hint.vessel],
-    talk: {
-      title: "Migrating visualizations from MapLibre to deck.gl",
-      by: "OpenJS Foundation · YouTube",
-      href: "https://youtu.be/eqTRG3tABZE",
-    },
+    cards: [cardFor('Global Fishing Watch', hint.vessel)],
+    talk: project('Global Fishing Watch')?.talk,
     start: true,
   },
   {
     when: "2022–2026 · endlessstudio · Tree Equity Score",
     text: "For American Forests I build Tree Equity Score, which maps the city blocks that live without shade, and I own the Python pipeline behind it, checked feature by feature from the source files to the tiles. It's data about heat, income and race, so it has to be exact, and it has to be told with care. City halls and neighborhood groups use it to argue for trees where people need them most.",
-    cards: [hint.treeEquity],
+    cards: [cardFor('Tree Equity Score', hint.treeEquity)],
   },
   {
     label: "now",
     when: "Now · endlessstudio · archaeo.studio",
     text: "Now I'm building archaeo.studio, a place where an excavation's records, maps and research live together. In a way it brings me back to History. I'm building it with AI as part of the process, but slowly and deliberately: first a model of the domain, then an explicit architecture, then the code, then checking that it all holds.",
-    cards: [hint.archaeo],
+    cards: [cardFor('Current exploration', hint.archaeo)],
   },
   {
     label: "next",

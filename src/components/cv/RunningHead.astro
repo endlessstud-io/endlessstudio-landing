@@ -1,0 +1,11 @@
+---
+import type { CvMetadata } from '../../lib/cv';
+interface Props { meta: CvMetadata }
+const { meta } = Astro.props;
+---
+
+<header class="running-head">
+  {meta.github ? <a href={meta.github}>GitHub</a> : <span>{meta.name}</span>}
+  <a href={meta.website}>endlessstudio</a>
+  <a href={meta.linkedin}>LinkedIn</a>
+</header>

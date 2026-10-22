@@ -2,6 +2,16 @@
 
 Astro 6 + React + Tailwind v4. Requires Node.js 22.12+.
 
+## Curriculum vitae (`/cv/`)
+
+Javier's three-page illustrated CV is edited in `src/content/cv.md`. Open `/cv/` to
+read or print it, or run `npm run cv:pdf` to generate the A4 PDF and page previews
+in `artifacts/`. See [the CV guide](docs/cv.md) for editing, image sources and export.
+
+The landing page keeps its chronological timeline and first-person narrative.
+Its project card copy, metadata, stacks and OpenJS talk read from the CV Markdown.
+CV page order and background card layouts apply only to `/cv/`.
+
 ## Deployment — GitHub Pages
 
 Production URL: <https://endlessstud.io>. `.github/workflows/deploy.yml` builds with
@@ -106,7 +116,8 @@ The wordmark top left is the three s of endle·sss·tudio (`.wordmark`, Fraunces
 relief sinks to a flat, faded map (`terrain.scale.y` → `menu.minRelief`, material opacity → `menu.ghost`) while the stone
 rolls in an arc up to the top centre of the screen and turns slowly there; the climb is held and resumes where it was when
 the menu closes (the move plays backwards). The stone lands centred in the `.menu-emblem` box of the menu markup, as wide
-as that box, so its place and size are decided by CSS. The menu copy and links under it are placeholders. The tween runs
+as that box, so its place and size are decided by CSS. The active menu follows the year progression along an elevation
+profile, with a stone anchor on its selected stop and project media. The tween runs
 on wall-clock time (`menu.duration`), independent of frame rate; Escape closes the menu too.
 
 - Tunables live in the `CONFIG` object at the top of `src/scripts/sisyphus.ts` (camera pitch, exaggeration, palette and its

@@ -1,0 +1,99 @@
+---
+import { cvBackgroundSections, cvProjectSections, renderCv } from '../../lib/cv';
+import RunningHead from '../../components/cv/RunningHead.astro';
+import PageFooter from '../../components/cv/PageFooter.astro';
+import '../../styles/cv.css';
+
+const { meta, section, optionalSection, line } = await renderCv();
+const projects = cvProjectSections
+  .map(optionalSection).filter(Boolean);
+const backgroundSections = cvBackgroundSections
+  .map(optionalSection).filter(Boolean);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={`${meta.name} — ${meta.role}. ${meta.specialism}. Experience, selected work and curriculum vitae.`} />
+    <meta name="theme-color" content="#eeece6" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={new URL('/cv/', Astro.site)} />
+    <link rel="preload" href="/cv/fonts/barlow-condensed-bold.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/cv/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/cv/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin />
+    <title>{meta.name} — Curriculum vitae</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#cv">Skip to curriculum vitae</a>
+    <nav class="cv-toolbar" aria-label="Document actions">
+      <a class="studio-link" href="/" aria-label="Back to endlessstudio"><span aria-hidden="true">↖</span> endlessstudio</a>
+      <span class="document-format">Curriculum vitae <span aria-hidden="true">/</span> A4 · 3 pages</span>
+      <div class="document-actions">
+        <a class="markdown-link" href="/cv/javier-abia.md" download="javier-abia-cv.md"><span aria-hidden="true">↓</span> Markdown</a>
+        <button class="print-button" type="button" data-print-cv><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7z" /><path d="M16 11h1" /></svg> Print / save PDF</button>
+      </div>
+    </nav>
+
+    <main class="cv-document" id="cv">
+      <article class="cv-sheet sheet-one" aria-label="Curriculum vitae, page 1: Profile and selected projects">
+        <RunningHead meta={meta} />
+
+        <div class="nameplate">
+          <h1>{meta.name}</h1>
+        </div>
+
+        <section class="intro-grid" aria-label="Profile">
+          <p class="role-title">{meta.role}</p>
+          <div class="profile-copy prose" set:html={section('Profile')} />
+        </section>
+
+        <div class="section-bar">
+          <h2><span class="section-number">01</span><span set:html={line('Current heading')} /></h2>
+        </div>
+
+        <section class="project-grid primary-projects" aria-label="Selected projects">
+          {projects.slice(0, 2).map((html) => <div class="prose project" set:html={html} />)}
+        </section>
+
+        <PageFooter email={meta.email} />
+      </article>
+
+      <article class="cv-sheet sheet-two" aria-label="Curriculum vitae, page 2: Selected projects continued">
+        <RunningHead meta={meta} />
+
+        <section class="project-grid continued-projects" aria-label="Selected projects continued">
+          {projects.slice(2).map((html) => <div class="prose project" set:html={html} />)}
+        </section>
+
+        <PageFooter email={meta.email} />
+      </article>
+
+      <article class="cv-sheet sheet-three" aria-label="Curriculum vitae, page 3: Earlier experience, working toolkit and academic background">
+        <RunningHead meta={meta} />
+
+        <div class="background-sections">
+          {backgroundSections.map((html) => <section class="prose detail-section" set:html={html.replace(/<(\/?)h3\b/g, '<$1h2')} />)}
+        </div>
+
+        <PageFooter email={meta.email} />
+      </article>
+    </main>
+    <p class="print-note">Made for paper, too. Choose A4 and turn off browser headers and footers when saving as PDF.</p>
+
+    <script>
+      const button = document.querySelector<HTMLButtonElement>('[data-print-cv]');
+      button?.addEventListener('click', async () => {
+        button.disabled = true;
+        try {
+          await document.fonts.ready;
+          await Promise.all(Array.from(document.images, (image) => image.decode().catch(() => {})));
+          window.print();
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

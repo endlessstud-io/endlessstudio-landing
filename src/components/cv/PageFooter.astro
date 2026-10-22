@@ -1,0 +1,6 @@
+---
+interface Props { email: string }
+const { email } = Astro.props;
+---
+
+<footer class="page-footer"><a href={`mailto:${email}`}>{email}</a></footer>

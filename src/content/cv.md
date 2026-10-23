@@ -1,6 +1,6 @@
 ---
 name: Javier Abia
-role: Senior data visualisation engineer
+role: Data visualisation engineer
 specialism: Interactive maps · Spatial data · Visual storytelling
 edition: October 2026
 email: hola@endlessstud.io
@@ -21,10 +21,9 @@ practice: Independent practice, since 2022
 
 ## Profile
 
-I build interactive maps and data visualisations that make complex datasets useful. Since 2014, my work has spanned maritime activity, commodity supply chains, biodiversity and climate.
+With a degree in History and a master's in archaeology and heritage, I've spent more than ten years turning complex geospatial data into maps and tools people can explore and act on. I work with product, data science and design teams to find the stories behind the numbers.
 
-I work independently across frontend engineering and spatial data pipelines, with scientists, designers and project teams—from validating source data to building clear, responsive interfaces.
-
+Archaeology taught me to read sources critically. Now AI lets me explore data faster, and I'm building my own tools. New geospatial formats, WebGPU and AI-assisted software make this a great moment to explore larger datasets and show what's in them in new ways.
 
 ## Current heading
 
@@ -40,9 +39,9 @@ October 2022–March 2025
 
 [![Fishing activity around the UK, Ireland and western Europe in Global Fishing Watch](/projects/gfw-fishing-hq-poster.webp)](https://globalfishingwatch.org/map)
 
-Built interactive views of maritime activity, from individual vessel behaviour to patterns across thousands of vessels over multiple years. Helped migrate the map from MapLibre to deck.gl, using custom GPU shaders and binary data to support exploration at different spatial and temporal scales.
+I helped migrate the map from MapLibre to deck.gl, writing custom GPU shaders and working with binary data, so anyone can follow a single vessel, or pull back to years of activity across thousands of them, without waiting for the map.
 
-*deck.gl · WebGL · React · Next.js · Nx · Terraform · Google Cloud*
+_deck.gl · WebGL · React · Next.js · Nx · Terraform · Google Cloud_
 
 > [Migrating visualizations from MapLibre to deck.gl](https://youtu.be/eqTRG3tABZE)  
 > OpenJS Foundation · Recorded talk
@@ -57,25 +56,25 @@ June 2022–March 2026
 
 [![Neighbourhood heat disparity in the Tree Equity Score national explorer](/projects/tree-equity-heat.webp)](https://www.treeequityscore.org/)
 
-Own the Python pipeline from shapefiles to GeoJSONL and PMTiles, validating schemas and feature counts from source to output.
+With American Forests and IcedCoffee Please I built the national explorer, planting scenarios and locality reports, so communities can push for trees where they're needed most.
 
-Build the national explorer, planting scenarios and locality reports with American Forests and IcedCoffee Please. Translate neighbourhood and parcel-level data into tools that help communities prioritise tree planting.
+I owned the Python pipeline from shapefiles to PMTiles, with versioning and schema checks.
 
-*Python · GeoPandas · PMTiles · Mapbox GL · D3 · React · Next.js*
+_Python · GeoPandas · PMTiles · Mapbox GL · D3 · React · Next.js_
 
 ## Current exploration
 
-### archaeo.studio
+### Archaeo Studio
 
 **Independent project**  
 **@endlessstudio**  
-Current practice
+November 2025–present
 
 ![archaeo.studio landing page introducing its archaeology research workspace](/projects/archaeo-studio-poster.webp)
 
-Building a research workspace with spatial views, DuckDB queries and Python notebooks. AI-assisted engineering grounded in domain models, explicit architecture and verification, from data exploration to implementation.
+A home for an excavation's records, maps and research, with spatial views, DuckDB queries and Python notebooks. In a way it brings me back to archaeology, where I started. I build it with AI in the loop, slowly and on purpose: domain model, architecture, code, verification.
 
-*DuckDB · Python notebooks · Spatial views · AI-assisted engineering*
+_DuckDB · Python notebooks · Spatial views · AI-assisted engineering_
 
 ## Half-Earth
 
@@ -87,9 +86,9 @@ October 2018–January 2022
 
 [![Species distributions and protected areas in the Half-Earth Project Map](/projects/half-earth-globe.webp)](https://map.half-earthproject.org/)
 
-Led the rebuild from Cesium to ArcGIS JS, defining architecture and performance baselines. Supervised four developers, shaped the roadmap with science and design leads, and explained technical capabilities to partners and project managers.
+I led the rebuild from Cesium to ArcGIS JS and a team of four developers, shaping the roadmap with the science and design leads. We set performance baselines from the start, because when a globe answers right away, people keep asking it things.
 
-*ArcGIS JS · React · Redux · D3 · PixiJS · WebGL · Cypress*
+_ArcGIS JS · React · Redux · D3 · PixiJS · WebGL · Cypress_
 
 ## Trase
 
@@ -101,9 +100,9 @@ January–March 2019
 
 [![Brazilian soy trade flows from producing municipalities to importing countries in Trase](/projects/trase-soy.webp)](https://trase.earth/)
 
-Implemented and optimised supply-chain flow visualisations tracing Brazilian soy from producing municipalities to importing companies and countries.
+I built and optimised the flow diagrams that follow Brazilian soy from the municipalities that grow it to the companies and countries that buy it. Laid out clearly, the risks in a supply chain become something people can act on.
 
-*React · Redux · D3 · Mapbox GL · Turf*
+_React · Redux · D3 · Mapbox GL · Turf_
 
 ## Climate Watch
 
@@ -115,9 +114,9 @@ January–December 2018
 
 [![Countries' climate commitments visualised in Climate Watch](/projects/climate-watch-ndc.webp)](https://www.climatewatchdata.org/)
 
-Built shared components, custom climate charts and user-configurable dashboards for Climate Watch and its India and Indonesia explorers.
+I built shared components, custom climate charts and dashboards people assemble themselves, for Climate Watch and its India and Indonesia explorers, so anyone can check whether countries are keeping their climate commitments.
 
-*React · Redux · D3 · Recharts*
+_React · Redux · D3 · Recharts_
 
 ## Earlier experience
 
@@ -148,11 +147,11 @@ TypeScript, JavaScript, React, Next.js, Redux, Tailwind, component systems.
 **Maps & graphics**  
 Mapbox GL, MapLibre, deck.gl, ArcGIS JS, D3, WebGL, custom shaders.
 
-**Data & validation**  
-Python, GeoPandas, Shapely, DuckDB queries, PMTiles, schema and feature-count checks.
+**Data & pipelines**  
+Python, GeoPandas, Shapely, DuckDB, PostGIS, PMTiles.
 
 **Delivery & collaboration**  
-Technical direction, architecture, AI-assisted workflows, Cypress, GitHub Actions, Google Cloud.
+Technical direction, architecture, AI-assisted workflows, Cypress, GitHub Actions, Google Cloud, AWS.
 
 ## Academic background
 
@@ -166,7 +165,7 @@ Ruby/Rails, JavaScript, HTML and CSS; clean code, design patterns and test-drive
 Universidad Autónoma de Madrid · 2010–2012  
 GIS, geoarchaeology, historical research, cultural heritage and fieldwork management.
 
-**Licenciatura in History**  
+**History degree**  
 Universidad de Santiago de Compostela · 2006  
 Specialisation in archaeology, prehistory and ancient history.
 

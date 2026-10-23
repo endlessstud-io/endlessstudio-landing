@@ -84,7 +84,7 @@ _DuckDB · Python notebooks · Spatial views · AI-assisted engineering_
 **@Vizzuality**  
 October 2018–January 2022
 
-[![Species distributions and protected areas in the Half-Earth Project Map](/projects/half-earth-globe.webp)](https://map.half-earthproject.org/)
+[![Biodiversity patterns and protected areas in Cameroon in the Half-Earth Project Map](/projects/half-earth-cameroon.webp)](https://map.half-earthproject.org/)
 
 I led the rebuild from Cesium to ArcGIS JS and a team of four developers, shaping the roadmap with the science and design leads. We set performance baselines from the start, because when a globe answers right away, people keep asking it things.
 

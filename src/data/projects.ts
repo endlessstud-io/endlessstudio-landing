@@ -3,13 +3,19 @@
  * built and the stack. Facts from the LinkedIn experience section and the Kpler CV (2026-10-14).
  *
  * Images are 2:1 crops of the screens in endlessstudio/conversaciones/kpler-cv/assets/work (the LinkedIn profile's
- * project media); Marxan has no large one there, so it keeps the stand-in from marxanplanning.org. archaeo.studio is the
+ * project media); Marxan's is the larger LinkedIn project image the user supplied on 2026-10-23 (a Kenya National
+ * scenario's solutions, 1280×948 centre-cropped to 1280×640); marxan.webp is the older marxanplanning.org stand-in. archaeo.studio is the
  * user's screen recording (a 21 s scroll through its landing, cropped and re-encoded to 1280×640 webm + mp4, poster =
  * its first frame), played only while its card is open; the site sits behind a login, so that word has no link (a hint
  * without `href` still opens its card). Global Fishing Watch plays the user's recording of the map too (its first 19 s,
  * 1920×960 at 30 fps, silent fast-start H.264, poster = first frame). Re-encode from the original with
  * scripts/encode-project-video.swift; the old 832 px export was too small for the wide timeline card.
- * gfw-fishing.webp is the older still.
+ * gfw-fishing.webp is the older still. Half-Earth and Tree Equity Score play a 12 s loop of three screenshots each,
+ * made with scripts/encode-map-loop.sh (2:1 at 1920×960, 3 s each with 1 s crossfades, back to the first; poster = the
+ * first frame). Half-Earth: the globe, then Cameroon's biodiversity and protection, then species richness over
+ * California. Tree Equity Score: the score over Jersey City, heat disparity over New York, then a Boston parcel in the
+ * planting analyzer. The originals and their sources are in media/ (see media/README.md); the CV's Half-Earth still is
+ * the Cameroon one (half-earth-cameroon.webp). half-earth-globe.webp and tree-equity-heat.webp are the older stills.
  */
 export interface Hint {
   word: string;
@@ -52,7 +58,7 @@ export const hint = {
     work: "Set the project up from scratch: configuration, CI automations, and the component library and docs (Playbook) the interface is built from.",
     stack: ["TypeScript", "Next.js", "React", "Redux", "deck.gl", "Mapbox GL", "Tailwind", "GitHub Actions"],
     href: "https://marxanplanning.org/",
-    image: "/projects/marxan.webp",
+    image: "/projects/marxan-kenya.webp",
   },
   species: {
     word: "species",
@@ -61,7 +67,8 @@ export const hint = {
     work: "Led the rebuild from Cesium to an ArcGIS JS app: the architecture from scratch, scalability and performance baselines, a team of four developers.",
     stack: ["ArcGIS JS", "React", "Redux", "D3", "PixiJS", "WebGL", "Service Workers", "Cypress"],
     href: "https://map.half-earthproject.org/",
-    image: "/projects/half-earth-globe.webp",
+    image: "/projects/half-earth-maps-poster.webp",
+    video: { mp4: "/projects/half-earth-maps.mp4" },
   },
   shade: {
     word: "shade",
@@ -90,7 +97,8 @@ export const hint = {
     work: "The national explorer, planting scenario planner and locality reports, and the Python pipeline behind them: shapefiles to GeoJSONL and PMTiles, with schema checks and feature counts validated from source to output.",
     stack: ["Next.js", "Mapbox GL", "PMTiles", "Tippecanoe", "Tegola", "Python", "GeoPandas", "Shapely"],
     href: "https://www.treeequityscore.org/",
-    image: "/projects/tree-equity-heat.webp",
+    image: "/projects/tree-equity-maps-poster.webp",
+    video: { mp4: "/projects/tree-equity-maps.mp4" },
   },
   pipeline: {
     word: "pipeline",

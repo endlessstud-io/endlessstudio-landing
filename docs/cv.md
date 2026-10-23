@@ -109,8 +109,10 @@ interfaces, Python validation, AI-assisted engineering and technical leadership.
 
 Images use the site's existing project assets under `public/projects/`: the
 Global Fishing Watch and archaeo.studio video posters; the Tree Equity Score,
-Half-Earth, Trase and Climate Watch images originating in the LinkedIn work
-archive. See the
+Trase and Climate Watch images originating in the LinkedIn work archive. The
+Half-Earth image, `half-earth-cameroon.webp`, is a screenshot of the map over
+Cameroon Javier supplied on 23 October 2026, cropped to 2:1 at 1600×800; its
+original is in `media/` (see `media/README.md`). See the
 provenance comments in `src/data/projects.ts`. The older 160px LinkedIn thumbnails
 remain in `public/cv/images/`, with their original source IDs in `SOURCES.md`.
 The layout uses the larger site assets to keep the printed images clearer.

@@ -72,7 +72,7 @@ November 2025–present
 
 ![archaeo.studio landing page introducing its archaeology research workspace](/projects/archaeo-studio-poster.webp)
 
-A home for an excavation's records, maps and research, with spatial views, DuckDB queries and Python notebooks. In a way it brings me back to archaeology, where I started. I build it with AI in the loop, slowly and on purpose: domain model, architecture, code, verification.
+A local-first platform where an excavation's records, maps and research live together. In a way it brings me back to archaeology, where I started. I build it with coding agents inside a structure I own: a written domain model, decision records, docs loaded only as needed, and work cards with risk tiers, acceptance criteria and proof of work.
 
 _DuckDB · Python notebooks · Spatial views · AI-assisted engineering_
 
